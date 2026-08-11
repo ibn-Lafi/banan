@@ -147,8 +147,8 @@ const styles = StyleSheet.create({
   outstandingValue: { fontSize: 13, fontWeight: "bold", color: INK },
 
   // ===== QR =====
-  qrBlock: { alignItems: "center", marginTop: 24 },
-  qrImage: { width: 130, height: 130 },
+  qrBlock: { alignItems: "center", marginTop: 20 },
+  qrImage: { width: 85, height: 85 },
 
   footer: {
     position: "absolute",
