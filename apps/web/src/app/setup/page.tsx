@@ -11,6 +11,7 @@ export default function SetupPage() {
   const router = useRouter();
   const [checking, setChecking] = useState(true);
   const [needsSetup, setNeedsSetup] = useState(false);
+  const [checkError, setCheckError] = useState<string | null>(null);
   const [setupToken, setSetupToken] = useState("");
   const [company, setCompany] = useState(initialCompany);
   const [admin, setAdmin] = useState(initialAdmin);
@@ -20,7 +21,14 @@ export default function SetupPage() {
   useEffect(() => {
     apiFetch<{ needs_setup: boolean }>("/setup/status", { auth: false })
       .then((res) => setNeedsSetup(res.needs_setup))
-      .catch(() => setNeedsSetup(false))
+      .catch((err) => {
+        setNeedsSetup(false);
+        setCheckError(
+          err instanceof ApiRequestError
+            ? err.message
+            : "تعذّر الاتصال بالـ API — تأكد أن NEXT_PUBLIC_API_URL مضبوط بشكل صحيح في إعدادات خدمة الـ web",
+        );
+      })
       .finally(() => setChecking(false));
   }, []);
 
@@ -44,6 +52,17 @@ export default function SetupPage() {
 
   if (checking) {
     return <p className="py-16 text-center text-sm text-gray-400">جارٍ التحقق...</p>;
+  }
+
+  if (checkError) {
+    return (
+      <main className="flex min-h-dvh items-center justify-center bg-gray-50 p-4">
+        <div className="w-full max-w-sm rounded-2xl bg-white p-6 text-center shadow-sm">
+          <p className="mb-2 font-semibold text-red-600">تعذّر التحقق من حالة الإعداد</p>
+          <p className="text-sm text-gray-500">{checkError}</p>
+        </div>
+      </main>
+    );
   }
 
   if (!needsSetup) {
