@@ -3,7 +3,7 @@ import type { CreateInvoiceDraftInput } from "@banan/validation";
 import { supabaseAdmin } from "../lib/supabase.js";
 import { ApiError } from "../lib/ApiError.js";
 import { getInvoiceBalance } from "./balanceService.js";
-import { generateInvoicePdf } from "./pdfService.js";
+import { generateInvoicePdf, type InvoicePdfStage } from "./pdfService.js";
 
 export interface CreateDraftContext {
   companyId: string;
@@ -186,8 +186,16 @@ export async function cancelInvoice(invoiceId: string, ctx: { companyId: string 
  * يُعاد التوليد في كل طلب (وليس مخزَّناً بشكل دائم كنسخة نهائية) لأن الرصيد
  * (المرتجعات/الدفعات) يمكن أن يتغيّر بعد الإصدار ويجب أن يظهر محدَّثاً في الـ PDF —
  * النسخة في Storage تبقى نسخة احتياطية/أرشيفية يتم استبدالها (upsert) في كل مرة.
+ *
+ * الفاتورة الواحدة يمكن أن يُطلب لها أكثر من نسخة PDF حسب مرحلتها: كما صدرت
+ * أول مرة (original)، بعد تطبيق مرتجع (after_return)، أو نسخة نهائية تشمل
+ * المرتجعات والدفعات معاً (final) — كل نسخة تُحفظ في Storage بمسارها الخاص.
  */
-export async function getInvoicePdf(invoiceId: string, ctx: { companyId: string }): Promise<Buffer> {
+export async function getInvoicePdf(
+  invoiceId: string,
+  ctx: { companyId: string },
+  stage: InvoicePdfStage = "final",
+): Promise<Buffer> {
   const { data: invoice, error: invoiceError } = await supabaseAdmin
     .from("invoices")
     .select("*, customers(*), invoice_items(*)")
@@ -211,9 +219,10 @@ export async function getInvoicePdf(invoiceId: string, ctx: { companyId: string 
     invoice,
     items: invoice.invoice_items,
     balance,
+    stage,
   });
 
-  const storagePath = `${ctx.companyId}/${invoiceId}.pdf`;
+  const storagePath = `${ctx.companyId}/${invoiceId}-${stage}.pdf`;
   const { error: uploadError } = await supabaseAdmin.storage
     .from("invoice-pdfs")
     .upload(storagePath, pdfBuffer, { contentType: "application/pdf", upsert: true });

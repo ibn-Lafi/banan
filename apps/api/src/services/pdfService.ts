@@ -81,6 +81,7 @@ const styles = StyleSheet.create({
   invoiceNumberValue: { fontSize: 16, fontWeight: "bold", color: INK, marginBottom: 10 },
   statusBadge: { borderRadius: 10, paddingVertical: 4, paddingHorizontal: 12 },
   statusBadgeText: { fontSize: 8.5, fontWeight: "bold" },
+  stageCaption: { fontSize: 8, color: GRAY, marginTop: 4 },
 
   // ===== بيانات العميل =====
   customerBlock: { borderTop: `1px solid ${BORDER_LIGHT}`, borderBottom: `1px solid ${BORDER_LIGHT}`, paddingVertical: 10, marginBottom: 22 },
@@ -162,6 +163,11 @@ function LtrSpan(value: string, style?: object) {
   return React.createElement(Text, { style: { direction: "ltr", ...style } }, value);
 }
 
+// ثلاث "نسخ" ممكنة لنفس الفاتورة حسب مرحلتها: الفاتورة كما صدرت أول مرة (تُهمَل
+// أي مرتجعات/دفعات لاحقة)، نسخة بعد تطبيق المرتجع فقط، ونسخة نهائية تشمل
+// المرتجعات والدفعات معاً (الحالة الافتراضية الحالية).
+export type InvoicePdfStage = "original" | "after_return" | "final";
+
 export interface InvoicePdfInput {
   company: Company;
   customer: Customer;
@@ -174,6 +180,7 @@ export interface InvoicePdfInput {
     total_payments: number;
     outstanding_amount: number;
   };
+  stage?: InvoicePdfStage;
 }
 
 async function buildQrImage(payload: string | null): Promise<string | null> {
@@ -196,10 +203,25 @@ function InvoiceMetaRow(label: string, valueNode: React.ReactNode) {
   );
 }
 
-function InvoiceDocument({ company, customer, invoice, items, balance }: InvoicePdfInput, qrDataUrl: string | null) {
+function InvoiceDocument(
+  { company, customer, invoice, items, balance, stage = "final" }: InvoicePdfInput,
+  qrDataUrl: string | null,
+) {
   const hasReturns = balance.total_returns > 0;
   const hasPayments = balance.total_payments > 0;
-  const hasAdjustments = hasReturns || hasPayments;
+
+  const showReturnsBlock = stage !== "original" && hasReturns;
+  const showPaymentsBlock = stage === "final" && hasPayments;
+  const hasAdjustments = showReturnsBlock || showPaymentsBlock;
+
+  const stageCaption =
+    stage === "original"
+      ? "نسخة: الفاتورة الأصلية"
+      : stage === "after_return"
+        ? "نسخة: بعد المرتجع"
+        : hasReturns || hasPayments
+          ? "نسخة: نهائية بعد السداد"
+          : null;
 
   return React.createElement(
     Document,
@@ -237,18 +259,27 @@ function InvoiceDocument({ company, customer, invoice, items, balance }: Invoice
 
       React.createElement(View, { style: styles.headerRule }),
 
-      // ===== شارة الحالة =====
+      // ===== شارة الحالة + نسخة الفاتورة =====
       React.createElement(
         View,
         { style: styles.subHeaderRow },
-        (() => {
-          const statusMeta = STATUS_META[invoice.status] ?? STATUS_META.issued;
-          return React.createElement(
-            View,
-            { style: [styles.statusBadge, { backgroundColor: statusMeta.bg }] },
-            React.createElement(Text, { style: [styles.statusBadgeText, { color: statusMeta.text }] }, statusMeta.label),
-          );
-        })(),
+        React.createElement(
+          View,
+          { style: { alignItems: "flex-end" } },
+          (() => {
+            const statusMeta = STATUS_META[invoice.status] ?? STATUS_META.issued;
+            return React.createElement(
+              View,
+              { style: [styles.statusBadge, { backgroundColor: statusMeta.bg }] },
+              React.createElement(
+                Text,
+                { style: [styles.statusBadgeText, { color: statusMeta.text }] },
+                statusMeta.label,
+              ),
+            );
+          })(),
+          stageCaption && React.createElement(Text, { style: styles.stageCaption }, stageCaption),
+        ),
       ),
 
       // ===== بيانات العميل — كل التفاصيل في سطر واحد =====
@@ -296,7 +327,7 @@ function InvoiceDocument({ company, customer, invoice, items, balance }: Invoice
               Text,
               { style: [styles.td, styles.colProduct] },
               item.product_name_snapshot,
-              item.returned_quantity > 0
+              stage !== "original" && item.returned_quantity > 0
                 ? React.createElement(Text, { style: styles.tdMuted }, `  (مرتجع: ${item.returned_quantity})`)
                 : null,
             ),
@@ -336,26 +367,27 @@ function InvoiceDocument({ company, customer, invoice, items, balance }: Invoice
             React.createElement(Text, { style: styles.grandTotalValue }, money(invoice.original_amount_gross)),
           ),
 
-          // القسم 14: إن تأثرت الفاتورة بمرتجع أو دفعة، تُعرض التفاصيل بوضوح
+          // القسم 14: إن تأثرت هذه النسخة من الفاتورة بمرتجع أو دفعة، تُعرض التفاصيل بوضوح
           hasAdjustments &&
             React.createElement(
               View,
               { style: styles.adjustmentsBlock },
-              hasReturns &&
+              showReturnsBlock &&
                 React.createElement(
                   View,
                   { style: styles.totalsRow },
                   React.createElement(Text, { style: styles.totalsLabel }, "إجمالي المرتجعات"),
                   React.createElement(Text, { style: styles.totalsValue }, `- ${money(balance.total_returns)}`),
                 ),
-              hasReturns &&
+              stage === "final" &&
+                hasReturns &&
                 React.createElement(
                   View,
                   { style: styles.totalsRow },
                   React.createElement(Text, { style: styles.totalsLabel }, "المبلغ الحالي بعد المرتجعات"),
                   React.createElement(Text, { style: styles.totalsValue }, money(balance.current_amount_gross)),
                 ),
-              hasPayments &&
+              showPaymentsBlock &&
                 React.createElement(
                   View,
                   { style: styles.totalsRow },
@@ -365,8 +397,16 @@ function InvoiceDocument({ company, customer, invoice, items, balance }: Invoice
               React.createElement(
                 View,
                 { style: styles.outstandingRow },
-                React.createElement(Text, { style: styles.outstandingLabel }, "المتبقي"),
-                React.createElement(Text, { style: styles.outstandingValue }, money(balance.outstanding_amount)),
+                React.createElement(
+                  Text,
+                  { style: styles.outstandingLabel },
+                  stage === "final" ? "المتبقي" : "المبلغ المستحق بعد المرتجع",
+                ),
+                React.createElement(
+                  Text,
+                  { style: styles.outstandingValue },
+                  money(stage === "final" ? balance.outstanding_amount : balance.current_amount_gross),
+                ),
               ),
             ),
         ),

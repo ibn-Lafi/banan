@@ -34,12 +34,20 @@ const STATUS_META: Record<string, { label: string; className: string }> = {
 
 const CAN_RETURN_STATUSES = ["issued", "partially_paid", "paid"];
 
+type PdfStage = "original" | "after_return" | "final";
+
+const PDF_STAGE_META: Record<PdfStage, string> = {
+  original: "الفاتورة الأصلية",
+  after_return: "الفاتورة بعد المرتجع",
+  final: "فاتورة السداد النهائية",
+};
+
 export default function InvoiceDetailsPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const [invoice, setInvoice] = useState<InvoiceDetail | null>(null);
   const [busy, setBusy] = useState(false);
-  const [pdfLoading, setPdfLoading] = useState(false);
+  const [pdfLoading, setPdfLoading] = useState<PdfStage | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [paymentAmount, setPaymentAmount] = useState("");
 
@@ -85,18 +93,18 @@ export default function InvoiceDetailsPage() {
     }
   }
 
-  async function handleDownloadPdf() {
-    setPdfLoading(true);
+  async function handleDownloadPdf(stage: PdfStage) {
+    setPdfLoading(stage);
     setError(null);
     try {
-      const blob = await apiFetchBlob(`/invoices/${id}/pdf`);
+      const blob = await apiFetchBlob(`/invoices/${id}/pdf?stage=${stage}`);
       const url = URL.createObjectURL(blob);
       window.open(url, "_blank");
       setTimeout(() => URL.revokeObjectURL(url), 60_000);
     } catch (err) {
       setError(err instanceof ApiRequestError ? err.message : "تعذّر توليد PDF");
     } finally {
-      setPdfLoading(false);
+      setPdfLoading(null);
     }
   }
 
@@ -221,13 +229,28 @@ export default function InvoiceDetailsPage() {
       {error && <p className="text-sm text-red-600">{error}</p>}
 
       {invoice.status !== "draft" && (
-        <button
-          onClick={handleDownloadPdf}
-          disabled={pdfLoading}
-          className="w-full rounded-lg border border-brand-600 py-2.5 font-semibold text-brand-600 disabled:opacity-60"
-        >
-          {pdfLoading ? "جارٍ التجهيز..." : "عرض / تحميل PDF"}
-        </button>
+        <div>
+          <h2 className="mb-2 text-sm font-semibold text-gray-700">مستندات PDF</h2>
+          <div className="space-y-2">
+            <PdfButton
+              stage="original"
+              loading={pdfLoading}
+              onClick={handleDownloadPdf}
+              label={PDF_STAGE_META.original}
+            />
+            {invoice.balance.total_returns > 0 && (
+              <PdfButton
+                stage="after_return"
+                loading={pdfLoading}
+                onClick={handleDownloadPdf}
+                label={PDF_STAGE_META.after_return}
+              />
+            )}
+            {invoice.balance.total_payments > 0 && (
+              <PdfButton stage="final" loading={pdfLoading} onClick={handleDownloadPdf} label={PDF_STAGE_META.final} />
+            )}
+          </div>
+        </div>
       )}
 
       {invoice.status === "draft" && (
@@ -337,5 +360,28 @@ function StageRow({ label, value, sub, bold }: { label: string; value: number; s
       </div>
       <p className={bold ? "text-lg font-bold" : "font-semibold text-gray-700"}>{value} ر.س</p>
     </div>
+  );
+}
+
+function PdfButton({
+  stage,
+  label,
+  loading,
+  onClick,
+}: {
+  stage: "original" | "after_return" | "final";
+  label: string;
+  loading: "original" | "after_return" | "final" | null;
+  onClick: (stage: "original" | "after_return" | "final") => void;
+}) {
+  return (
+    <button
+      onClick={() => onClick(stage)}
+      disabled={loading !== null}
+      className="flex w-full items-center justify-between rounded-lg border border-brand-600 px-4 py-2.5 font-semibold text-brand-600 disabled:opacity-60"
+    >
+      <span>{label}</span>
+      <span className="text-xs">{loading === stage ? "جارٍ التجهيز..." : "عرض / تحميل PDF"}</span>
+    </button>
   );
 }

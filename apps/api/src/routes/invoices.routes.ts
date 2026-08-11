@@ -7,6 +7,9 @@ import { ApiError } from "../lib/ApiError.js";
 import { writeAuditLog } from "../services/auditService.js";
 import { cancelInvoice, createInvoiceDraft, getInvoicePdf, issueInvoice } from "../services/invoiceService.js";
 import { getInvoiceBalance } from "../services/balanceService.js";
+import type { InvoicePdfStage } from "../services/pdfService.js";
+
+const PDF_STAGES: InvoicePdfStage[] = ["original", "after_return", "final"];
 
 export const invoicesRouter = Router();
 invoicesRouter.use(requireAuth);
@@ -181,11 +184,16 @@ invoicesRouter.get(
     if (invoice.status === "draft") {
       throw ApiError.conflict("يجب إصدار الفاتورة أولاً قبل توليد PDF");
     }
-    const pdfBuffer = await getInvoicePdf(invoice.id, { companyId: req.user!.company_id });
+    const requestedStage = typeof req.query.stage === "string" ? req.query.stage : "final";
+    if (!PDF_STAGES.includes(requestedStage as InvoicePdfStage)) {
+      throw ApiError.badRequest("نسخة PDF غير معروفة");
+    }
+    const stage = requestedStage as InvoicePdfStage;
+    const pdfBuffer = await getInvoicePdf(invoice.id, { companyId: req.user!.company_id }, stage);
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader(
       "Content-Disposition",
-      `inline; filename="${invoice.invoice_number ?? invoice.id}.pdf"`,
+      `inline; filename="${invoice.invoice_number ?? invoice.id}-${stage}.pdf"`,
     );
     res.send(pdfBuffer);
   }),
