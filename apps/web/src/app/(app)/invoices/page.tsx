@@ -11,7 +11,13 @@ interface InvoiceListItem {
   status: string;
   original_amount_gross: number;
   invoice_date: string;
+  customer_id: string;
   customers: { name: string } | null;
+}
+
+interface CustomerOption {
+  id: string;
+  name: string;
 }
 
 const STATUS_META: Record<string, { label: string; className: string }> = {
@@ -33,9 +39,11 @@ const FILTERS: { key: string; label: string }[] = [
 
 export default function InvoicesPage() {
   const [invoices, setInvoices] = useState<InvoiceListItem[]>([]);
+  const [customers, setCustomers] = useState<CustomerOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
-  const [filter, setFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [customerFilter, setCustomerFilter] = useState("all");
 
   function load() {
     apiFetch<{ data: InvoiceListItem[] }>("/invoices")
@@ -43,11 +51,19 @@ export default function InvoicesPage() {
       .finally(() => setLoading(false));
   }
 
-  useEffect(load, []);
+  useEffect(() => {
+    load();
+    apiFetch<{ data: CustomerOption[] }>("/customers").then((res) => setCustomers(res.data));
+  }, []);
 
   const filtered = useMemo(
-    () => (filter === "all" ? invoices : invoices.filter((i) => i.status === filter)),
-    [invoices, filter],
+    () =>
+      invoices.filter(
+        (i) =>
+          (statusFilter === "all" || i.status === statusFilter) &&
+          (customerFilter === "all" || i.customer_id === customerFilter),
+      ),
+    [invoices, statusFilter, customerFilter],
   );
 
   return (
@@ -73,18 +89,29 @@ export default function InvoicesPage() {
         </div>
       )}
 
-      <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1">
-        {FILTERS.map((f) => (
-          <button
-            key={f.key}
-            onClick={() => setFilter(f.key)}
-            className={`whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold transition ${
-              filter === f.key ? "bg-brand-600 text-white" : "bg-gray-100 text-gray-600"
-            }`}
-          >
-            {f.label}
-          </button>
-        ))}
+      <div className="space-y-2">
+        <select className="input" value={customerFilter} onChange={(e) => setCustomerFilter(e.target.value)}>
+          <option value="all">كل العملاء</option>
+          {customers.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.name}
+            </option>
+          ))}
+        </select>
+
+        <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1">
+          {FILTERS.map((f) => (
+            <button
+              key={f.key}
+              onClick={() => setStatusFilter(f.key)}
+              className={`whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold transition ${
+                statusFilter === f.key ? "bg-brand-600 text-white" : "bg-gray-100 text-gray-600"
+              }`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {loading ? (
