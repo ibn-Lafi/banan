@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { apiFetch, ApiRequestError } from "@/lib/apiClient";
+import { API_URL, apiFetch, ApiRequestError } from "@/lib/apiClient";
 
 const initialCompany = { name: "", vat_number: "", cr_number: "", phone: "", email: "", address: "" };
 const initialAdmin = { username: "", full_name: "", password: "" };
@@ -26,7 +26,7 @@ export default function SetupPage() {
         setCheckError(
           err instanceof ApiRequestError
             ? err.message
-            : "تعذّر الاتصال بالـ API — تأكد أن NEXT_PUBLIC_API_URL مضبوط بشكل صحيح في إعدادات خدمة الـ web",
+            : `تعذّر الاتصال بالـ API على الرابط: ${API_URL} — تأكد أن هذا الرابط صحيح وأن CORS_ORIGIN في خدمة الـ api يطابق رابط هذا الموقع بالضبط`,
         );
       })
       .finally(() => setChecking(false));
