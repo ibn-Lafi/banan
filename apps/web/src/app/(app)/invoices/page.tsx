@@ -44,6 +44,8 @@ export default function InvoicesPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [statusFilter, setStatusFilter] = useState("all");
   const [customerFilter, setCustomerFilter] = useState("all");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
 
   function load() {
     apiFetch<{ data: InvoiceListItem[] }>("/invoices")
@@ -61,10 +63,14 @@ export default function InvoicesPage() {
       invoices.filter(
         (i) =>
           (statusFilter === "all" || i.status === statusFilter) &&
-          (customerFilter === "all" || i.customer_id === customerFilter),
+          (customerFilter === "all" || i.customer_id === customerFilter) &&
+          (!fromDate || i.invoice_date >= fromDate) &&
+          (!toDate || i.invoice_date <= toDate),
       ),
-    [invoices, statusFilter, customerFilter],
+    [invoices, statusFilter, customerFilter, fromDate, toDate],
   );
+
+  const hasDateFilter = Boolean(fromDate || toDate);
 
   return (
     <div className="space-y-4">
@@ -98,6 +104,28 @@ export default function InvoicesPage() {
             </option>
           ))}
         </select>
+
+        <div className="flex items-center gap-2">
+          <div className="flex-1">
+            <label className="mb-1 block text-xs text-gray-500">من تاريخ</label>
+            <input type="date" className="input" value={fromDate} onChange={(e) => setFromDate(e.target.value)} />
+          </div>
+          <div className="flex-1">
+            <label className="mb-1 block text-xs text-gray-500">إلى تاريخ</label>
+            <input type="date" className="input" value={toDate} onChange={(e) => setToDate(e.target.value)} />
+          </div>
+          {hasDateFilter && (
+            <button
+              onClick={() => {
+                setFromDate("");
+                setToDate("");
+              }}
+              className="mt-5 whitespace-nowrap text-xs font-semibold text-gray-500"
+            >
+              مسح
+            </button>
+          )}
+        </div>
 
         <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1">
           {FILTERS.map((f) => (
