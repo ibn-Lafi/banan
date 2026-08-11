@@ -26,25 +26,28 @@ function ensureFontsRegistered() {
   fontsRegistered = true;
 }
 
-// أبيض وأسود بالكامل — بدون ألوان هوية، بتصميم رسمي كلاسيكي شبيه بفواتير
-// الشركات الدولية (خطوط فاصلة، جداول مسطّرة، عناوين كبيرة واضحة).
-const INK = "#000000";
-const INK_SOFT = "#1a1a1a";
-const GRAY = "#4b4b4b";
-const GRAY_LIGHT = "#8a8a8a";
-const BORDER = "#000000";
-const BORDER_LIGHT = "#cccccc";
-const ROW_ALT = "#f4f4f4";
-const HEADER_FILL = "#000000";
+// ترتيب/تخطيط رسمي كلاسيكي (خطوط فاصلة، جداول مسطّرة، عناوين واضحة) بألوان
+// هوية الواجهة (apps/web/tailwind.config.ts -> brand) بدل الأبيض والأسود البحت.
+const BRAND = "#0a7e58";
+const BRAND_DARK = "#086346";
+const BRAND_LIGHT = "#eefaf3";
+const INK = "#111827";
+const INK_SOFT = "#1f2937";
+const GRAY = "#6b7280";
+const GRAY_LIGHT = "#9ca3af";
+const BORDER = "#e5e7eb";
+const BORDER_LIGHT = "#f0f0f0";
+const ROW_ALT = "#f9fafb";
+const HEADER_FILL = BRAND;
 
-const STATUS_LABELS: Record<string, string> = {
-  draft: "مسودة",
-  issued: "صادرة",
-  due: "آجلة",
-  partially_paid: "مدفوعة جزئياً",
-  paid: "مدفوعة بالكامل",
-  overdue: "متأخرة السداد",
-  cancelled: "ملغاة",
+const STATUS_META: Record<string, { label: string; bg: string; text: string }> = {
+  draft: { label: "مسودة", bg: "#f3f4f6", text: "#374151" },
+  issued: { label: "صادرة", bg: "#eff6ff", text: "#1d4ed8" },
+  due: { label: "آجلة", bg: "#eff6ff", text: "#1d4ed8" },
+  partially_paid: { label: "مدفوعة جزئياً", bg: "#fffbeb", text: "#b45309" },
+  paid: { label: "مدفوعة بالكامل", bg: BRAND_LIGHT, text: BRAND_DARK },
+  overdue: { label: "متأخرة السداد", bg: "#fef2f2", text: "#b91c1c" },
+  cancelled: { label: "ملغاة", bg: "#f3f4f6", text: "#6b7280" },
 };
 
 const styles = StyleSheet.create({
@@ -65,24 +68,35 @@ const styles = StyleSheet.create({
   metaLine: { fontSize: 8.5, color: GRAY, marginBottom: 2, lineHeight: 1.5 },
 
   invoiceBlock: { alignItems: "flex-end" },
-  invoiceTitle: { fontSize: 20, fontWeight: "bold", color: INK, letterSpacing: 1, marginBottom: 3 },
+  invoiceTitle: { fontSize: 20, fontWeight: "bold", color: BRAND, letterSpacing: 1, marginBottom: 3 },
   invoiceTypeLabel: { fontSize: 8, color: GRAY, marginBottom: 10 },
   invoiceMetaTable: { alignItems: "flex-end" },
   invoiceMetaRow: { flexDirection: "row", marginBottom: 3 },
   invoiceMetaLabel: { fontSize: 8.5, color: GRAY, marginLeft: 10 },
   invoiceMetaValue: { fontSize: 8.5, fontWeight: "bold", color: INK },
 
-  headerRule: { borderBottom: `2px solid ${BORDER}`, marginTop: 18, marginBottom: 16 },
+  headerRule: { borderBottom: `2px solid ${BRAND}`, marginTop: 18, marginBottom: 16 },
 
   // ===== شريط رقم الفاتورة + الحالة =====
   subHeaderRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 20 },
   invoiceNumberLabel: { fontSize: 8.5, color: GRAY, marginBottom: 2 },
   invoiceNumberValue: { fontSize: 13, fontWeight: "bold", color: INK },
-  statusBadge: { borderWidth: 1, borderStyle: "solid", borderColor: INK, paddingVertical: 4, paddingHorizontal: 12 },
-  statusBadgeText: { fontSize: 8.5, fontWeight: "bold", color: INK },
+  statusBadge: { borderRadius: 10, paddingVertical: 4, paddingHorizontal: 12 },
+  statusBadgeText: { fontSize: 8.5, fontWeight: "bold" },
 
   // ===== بيانات العميل =====
-  billToLabel: { fontSize: 8.5, fontWeight: "bold", color: GRAY, marginBottom: 6, letterSpacing: 0.5 },
+  billToLabel: {
+    fontSize: 8.5,
+    fontWeight: "bold",
+    color: BRAND_DARK,
+    backgroundColor: BRAND_LIGHT,
+    alignSelf: "flex-start",
+    paddingVertical: 3,
+    paddingHorizontal: 9,
+    borderRadius: 3,
+    marginBottom: 8,
+    letterSpacing: 0.5,
+  },
   customerBlock: { borderTop: `1px solid ${BORDER_LIGHT}`, borderBottom: `1px solid ${BORDER_LIGHT}`, paddingVertical: 10, marginBottom: 22 },
   customerName: { fontSize: 11.5, fontWeight: "bold", color: INK, marginBottom: 3 },
   customerLine: { fontSize: 8.5, color: GRAY, marginBottom: 1.5 },
@@ -124,16 +138,16 @@ const styles = StyleSheet.create({
   grandTotalLabel: { fontSize: 10, fontWeight: "bold", color: "#ffffff" },
   grandTotalValue: { fontSize: 13, fontWeight: "bold", color: "#ffffff" },
 
-  adjustmentsBlock: { marginTop: 10, paddingTop: 8, borderTop: `1px dashed ${BORDER_LIGHT}` },
+  adjustmentsBlock: { marginTop: 10, paddingTop: 8, borderTop: `1px dashed ${BORDER}` },
   outstandingRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     marginTop: 4,
     paddingTop: 8,
-    borderTop: `2px solid ${BORDER}`,
+    borderTop: `2px solid ${BRAND}`,
   },
   outstandingLabel: { fontSize: 10, fontWeight: "bold", color: INK },
-  outstandingValue: { fontSize: 13, fontWeight: "bold", color: INK },
+  outstandingValue: { fontSize: 13, fontWeight: "bold", color: BRAND_DARK },
 
   // ===== QR =====
   qrBlock: { alignItems: "center", marginTop: 16 },
@@ -264,11 +278,14 @@ function InvoiceDocument({ company, customer, invoice, items, balance }: Invoice
           React.createElement(Text, { style: styles.invoiceNumberLabel }, "رقم الفاتورة"),
           React.createElement(Text, { style: styles.invoiceNumberValue }, invoice.invoice_number ?? "—"),
         ),
-        React.createElement(
-          View,
-          { style: styles.statusBadge },
-          React.createElement(Text, { style: styles.statusBadgeText }, STATUS_LABELS[invoice.status] ?? invoice.status),
-        ),
+        (() => {
+          const statusMeta = STATUS_META[invoice.status] ?? { label: invoice.status, bg: "#f3f4f6", text: "#374151" };
+          return React.createElement(
+            View,
+            { style: [styles.statusBadge, { backgroundColor: statusMeta.bg }] },
+            React.createElement(Text, { style: [styles.statusBadgeText, { color: statusMeta.text }] }, statusMeta.label),
+          );
+        })(),
       ),
 
       // ===== بيانات العميل =====
@@ -378,7 +395,7 @@ function InvoiceDocument({ company, customer, invoice, items, balance }: Invoice
                   View,
                   { style: styles.totalsRow },
                   React.createElement(Text, { style: styles.totalsLabel }, "إجمالي المرتجعات"),
-                  React.createElement(Text, { style: styles.totalsValue }, `- ${money(balance.total_returns)}`),
+                  React.createElement(Text, { style: [styles.totalsValue, { color: "#b91c1c" }] }, `- ${money(balance.total_returns)}`),
                 ),
               hasReturns &&
                 React.createElement(
@@ -392,7 +409,7 @@ function InvoiceDocument({ company, customer, invoice, items, balance }: Invoice
                   View,
                   { style: styles.totalsRow },
                   React.createElement(Text, { style: styles.totalsLabel }, "إجمالي المدفوع"),
-                  React.createElement(Text, { style: styles.totalsValue }, `- ${money(balance.total_payments)}`),
+                  React.createElement(Text, { style: [styles.totalsValue, { color: BRAND_DARK }] }, `- ${money(balance.total_payments)}`),
                 ),
               React.createElement(
                 View,
