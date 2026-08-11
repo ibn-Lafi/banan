@@ -37,6 +37,7 @@ const STATUS_META: Record<string, { label: string; className: string }> = {
 const CAN_RETURN_STATUSES = ["issued", "partially_paid", "returned", "paid"];
 
 type PdfStage = "original" | "after_return" | "final";
+type PdfAction = "view" | "download" | "share";
 
 const PDF_STAGE_META: Record<PdfStage, string> = {
   original: "الفاتورة الأصلية",
@@ -49,7 +50,7 @@ export default function InvoiceDetailsPage() {
   const router = useRouter();
   const [invoice, setInvoice] = useState<InvoiceDetail | null>(null);
   const [busy, setBusy] = useState(false);
-  const [pdfLoading, setPdfLoading] = useState<PdfStage | null>(null);
+  const [pdfLoading, setPdfLoading] = useState<{ stage: PdfStage; action: PdfAction } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [paymentAmount, setPaymentAmount] = useState("");
 
@@ -95,8 +96,12 @@ export default function InvoiceDetailsPage() {
     }
   }
 
-  async function handleDownloadPdf(stage: PdfStage) {
-    setPdfLoading(stage);
+  function pdfFileName(stage: PdfStage) {
+    return `${invoice?.invoice_number ?? "فاتورة"}-${stage}.pdf`;
+  }
+
+  async function handleViewPdf(stage: PdfStage) {
+    setPdfLoading({ stage, action: "view" });
     setError(null);
     try {
       const blob = await apiFetchBlob(`/invoices/${id}/pdf?stage=${stage}`);
@@ -104,7 +109,60 @@ export default function InvoiceDetailsPage() {
       window.open(url, "_blank");
       setTimeout(() => URL.revokeObjectURL(url), 60_000);
     } catch (err) {
-      setError(err instanceof ApiRequestError ? err.message : "تعذّر توليد PDF");
+      setError(err instanceof ApiRequestError ? err.message : "تعذّر عرض PDF");
+    } finally {
+      setPdfLoading(null);
+    }
+  }
+
+  async function handleDownloadPdf(stage: PdfStage) {
+    setPdfLoading({ stage, action: "download" });
+    setError(null);
+    try {
+      const blob = await apiFetchBlob(`/invoices/${id}/pdf?stage=${stage}`);
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = pdfFileName(stage);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    } catch (err) {
+      setError(err instanceof ApiRequestError ? err.message : "تعذّر تحميل PDF");
+    } finally {
+      setPdfLoading(null);
+    }
+  }
+
+  async function handleSharePdf(stage: PdfStage) {
+    setPdfLoading({ stage, action: "share" });
+    setError(null);
+    try {
+      const blob = await apiFetchBlob(`/invoices/${id}/pdf?stage=${stage}`);
+      const filename = pdfFileName(stage);
+      const file = new File([blob], filename, { type: "application/pdf" });
+
+      if (navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file], title: filename });
+      } else {
+        // لا يدعم المتصفح مشاركة الملفات (Web Share API) — نحمّل الملف بدلاً من ذلك
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 60_000);
+        setError("المشاركة غير مدعومة في هذا المتصفح، تم تحميل الملف بدلاً من ذلك");
+      }
+    } catch (err) {
+      if (err instanceof DOMException && err.name === "AbortError") {
+        // المستخدم أغلق نافذة المشاركة بنفسه — ليس خطأ
+      } else {
+        setError(err instanceof ApiRequestError ? err.message : "تعذّر إرسال PDF");
+      }
     } finally {
       setPdfLoading(null);
     }
@@ -234,22 +292,33 @@ export default function InvoiceDetailsPage() {
         <div>
           <h2 className="mb-2 text-sm font-semibold text-gray-700">مستندات PDF</h2>
           <div className="space-y-2">
-            <PdfButton
+            <PdfActions
               stage="original"
-              loading={pdfLoading}
-              onClick={handleDownloadPdf}
               label={PDF_STAGE_META.original}
+              loading={pdfLoading}
+              onView={handleViewPdf}
+              onDownload={handleDownloadPdf}
+              onShare={handleSharePdf}
             />
             {invoice.balance.total_returns > 0 && (
-              <PdfButton
+              <PdfActions
                 stage="after_return"
-                loading={pdfLoading}
-                onClick={handleDownloadPdf}
                 label={PDF_STAGE_META.after_return}
+                loading={pdfLoading}
+                onView={handleViewPdf}
+                onDownload={handleDownloadPdf}
+                onShare={handleSharePdf}
               />
             )}
             {invoice.balance.total_payments > 0 && (
-              <PdfButton stage="final" loading={pdfLoading} onClick={handleDownloadPdf} label={PDF_STAGE_META.final} />
+              <PdfActions
+                stage="final"
+                label={PDF_STAGE_META.final}
+                loading={pdfLoading}
+                onView={handleViewPdf}
+                onDownload={handleDownloadPdf}
+                onShare={handleSharePdf}
+              />
             )}
           </div>
         </div>
@@ -367,25 +436,50 @@ function StageRow({ label, value, sub, bold }: { label: string; value: number; s
   );
 }
 
-function PdfButton({
+function PdfActions({
   stage,
   label,
   loading,
-  onClick,
+  onView,
+  onDownload,
+  onShare,
 }: {
-  stage: "original" | "after_return" | "final";
+  stage: PdfStage;
   label: string;
-  loading: "original" | "after_return" | "final" | null;
-  onClick: (stage: "original" | "after_return" | "final") => void;
+  loading: { stage: PdfStage; action: PdfAction } | null;
+  onView: (stage: PdfStage) => void;
+  onDownload: (stage: PdfStage) => void;
+  onShare: (stage: PdfStage) => void;
 }) {
+  const busy = loading !== null && loading.stage === stage;
+  const isLoading = (action: PdfAction) => busy && loading?.action === action;
+
   return (
-    <button
-      onClick={() => onClick(stage)}
-      disabled={loading !== null}
-      className="flex w-full items-center justify-between rounded-lg border border-brand-600 px-4 py-2.5 font-semibold text-brand-600 disabled:opacity-60"
-    >
-      <span>{label}</span>
-      <span className="text-xs">{loading === stage ? "جارٍ التجهيز..." : "عرض / تحميل PDF"}</span>
-    </button>
+    <div className="rounded-lg border border-gray-200 p-3">
+      <p className="mb-2 text-sm font-semibold text-gray-700">{label}</p>
+      <div className="flex gap-2">
+        <button
+          onClick={() => onView(stage)}
+          disabled={busy}
+          className="flex-1 rounded-lg border border-brand-600 py-2 text-xs font-semibold text-brand-600 disabled:opacity-60"
+        >
+          {isLoading("view") ? "..." : "عرض"}
+        </button>
+        <button
+          onClick={() => onDownload(stage)}
+          disabled={busy}
+          className="flex-1 rounded-lg border border-brand-600 py-2 text-xs font-semibold text-brand-600 disabled:opacity-60"
+        >
+          {isLoading("download") ? "..." : "تحميل"}
+        </button>
+        <button
+          onClick={() => onShare(stage)}
+          disabled={busy}
+          className="flex-1 rounded-lg bg-brand-600 py-2 text-xs font-semibold text-white disabled:opacity-60"
+        >
+          {isLoading("share") ? "..." : "إرسال"}
+        </button>
+      </div>
+    </div>
   );
 }
