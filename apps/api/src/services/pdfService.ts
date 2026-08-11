@@ -51,6 +51,7 @@ const styles = StyleSheet.create({
   page: {
     fontFamily: "Cairo",
     direction: "rtl",
+    textAlign: "right",
     fontSize: 9.5,
     color: INK_SOFT,
     paddingTop: 40,
@@ -59,7 +60,9 @@ const styles = StyleSheet.create({
   },
 
   // ===== رأس الصفحة =====
-  headerRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" },
+  // row-reverse: يضع أول عنصر (بيانات الشركة) في أقصى اليمين وآخر عنصر (بيانات
+  // الفاتورة) في أقصى اليسار، وهو ترتيب القراءة الصحيح من اليمين لليسار.
+  headerRow: { flexDirection: "row-reverse", justifyContent: "space-between", alignItems: "flex-start" },
   companyBlock: { maxWidth: "55%" },
   companyName: { fontSize: 15, fontWeight: "bold", color: INK, marginBottom: 5 },
   metaLine: { fontSize: 8.5, color: GRAY, marginBottom: 2, lineHeight: 1.5 },
@@ -74,7 +77,7 @@ const styles = StyleSheet.create({
   headerRule: { borderBottom: `2px solid ${INK}`, marginTop: 18, marginBottom: 16 },
 
   // ===== شريط رقم الفاتورة + الحالة =====
-  subHeaderRow: { flexDirection: "row", justifyContent: "flex-start", alignItems: "center", marginBottom: 20 },
+  subHeaderRow: { flexDirection: "row", justifyContent: "flex-end", alignItems: "center", marginBottom: 20 },
   invoiceNumberValue: { fontSize: 16, fontWeight: "bold", color: INK, marginBottom: 10 },
   statusBadge: { borderRadius: 10, paddingVertical: 4, paddingHorizontal: 12 },
   statusBadgeText: { fontSize: 8.5, fontWeight: "bold" },
@@ -85,9 +88,21 @@ const styles = StyleSheet.create({
   customerLine: { fontSize: 8.5, color: GRAY, marginBottom: 1.5 },
 
   // ===== جدول البنود =====
+  // row-reverse: العمود الأول (# ثم المنتج) في أقصى اليمين، والإجمالي في أقصى
+  // اليسار، وهو ترتيب أعمدة الفاتورة العربية الصحيح.
   table: { marginBottom: 4 },
-  tableHeaderRow: { flexDirection: "row", backgroundColor: HEADER_FILL, paddingVertical: 7, paddingHorizontal: 8 },
-  tableRow: { flexDirection: "row", paddingVertical: 7, paddingHorizontal: 8, borderBottom: `1px solid ${BORDER_LIGHT}` },
+  tableHeaderRow: {
+    flexDirection: "row-reverse",
+    backgroundColor: HEADER_FILL,
+    paddingVertical: 7,
+    paddingHorizontal: 8,
+  },
+  tableRow: {
+    flexDirection: "row-reverse",
+    paddingVertical: 7,
+    paddingHorizontal: 8,
+    borderBottom: `1px solid ${BORDER_LIGHT}`,
+  },
   th: { fontWeight: "bold", fontSize: 8, color: NEUTRAL_TEXT },
   td: { fontSize: 9, color: INK_SOFT },
   tdMuted: { fontSize: 7.5, color: GRAY_LIGHT },
@@ -99,9 +114,9 @@ const styles = StyleSheet.create({
   totalsWrap: { marginTop: 20 },
 
   totalsCard: { width: "100%" },
-  totalsRow: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 5 },
+  totalsRow: { flexDirection: "row-reverse", justifyContent: "space-between", paddingVertical: 5 },
   totalsRowBorder: {
-    flexDirection: "row",
+    flexDirection: "row-reverse",
     justifyContent: "space-between",
     paddingVertical: 5,
     borderTop: `1px solid ${BORDER_LIGHT}`,
@@ -109,7 +124,7 @@ const styles = StyleSheet.create({
   totalsLabel: { fontSize: 9, color: GRAY },
   totalsValue: { fontSize: 9, color: INK_SOFT },
   grandTotalRow: {
-    flexDirection: "row",
+    flexDirection: "row-reverse",
     justifyContent: "space-between",
     backgroundColor: HEADER_FILL,
     paddingVertical: 9,
@@ -121,7 +136,7 @@ const styles = StyleSheet.create({
 
   adjustmentsBlock: { marginTop: 10, paddingTop: 8, borderTop: `1px dashed ${BORDER}` },
   outstandingRow: {
-    flexDirection: "row",
+    flexDirection: "row-reverse",
     justifyContent: "space-between",
     marginTop: 4,
     paddingTop: 8,
