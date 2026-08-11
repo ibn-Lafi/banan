@@ -1,0 +1,12 @@
+{
+  "name": "بنان — نظام الفوترة",
+  "short_name": "بنان",
+  "description": "نظام إدارة مبيعات وفوترة للمناديب",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "background_color": "#f9fafb",
+  "theme_color": "#0e9f6e",
+  "lang": "ar",
+  "dir": "rtl",
+  "icons": []
+}
