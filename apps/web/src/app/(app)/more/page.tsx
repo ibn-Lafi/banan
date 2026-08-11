@@ -15,7 +15,6 @@ export default function MorePage() {
 
   const links = [
     { href: "/products", label: "المنتجات" },
-    { href: "/returns", label: "المرتجعات" },
     { href: "/reports", label: "التقارير" },
     ...(session?.user.role === "admin"
       ? [

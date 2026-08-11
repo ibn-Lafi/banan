@@ -7,7 +7,6 @@ import { clearSession, getSession } from "@/lib/session";
 
 const secondaryLinks = [
   { href: "/products", label: "المنتجات" },
-  { href: "/returns", label: "المرتجعات" },
   { href: "/reports", label: "التقارير" },
 ];
 
