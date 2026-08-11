@@ -205,13 +205,7 @@ function InvoiceDocument({ company, customer, invoice, items, balance }: Invoice
             React.createElement(Text, { style: styles.metaLine }, `الرقم الضريبي: ${company.vat_number}`),
           company.cr_number &&
             React.createElement(Text, { style: styles.metaLine }, `السجل التجاري: ${company.cr_number}`),
-          (company.phone || company.email) &&
-            React.createElement(
-              Text,
-              { style: styles.metaLine },
-              [company.phone, company.email].filter(Boolean).join("  •  "),
-            ),
-          company.address && React.createElement(Text, { style: styles.metaLine }, company.address),
+          company.phone && React.createElement(Text, { style: styles.metaLine }, company.phone),
         ),
         React.createElement(
           View,
@@ -242,17 +236,22 @@ function InvoiceDocument({ company, customer, invoice, items, balance }: Invoice
         })(),
       ),
 
-      // ===== بيانات العميل =====
+      // ===== بيانات العميل — كل التفاصيل في سطر واحد =====
       React.createElement(
         View,
         { style: styles.customerBlock },
         React.createElement(Text, { style: styles.customerName }, customer.name),
-        customer.vat_number &&
-          React.createElement(Text, { style: styles.customerLine }, `الرقم الضريبي: ${customer.vat_number}`),
-        customer.cr_number &&
-          React.createElement(Text, { style: styles.customerLine }, `السجل التجاري: ${customer.cr_number}`),
-        customer.phone && React.createElement(Text, { style: styles.customerLine }, `الجوال: ${customer.phone}`),
-        customer.address && React.createElement(Text, { style: styles.customerLine }, customer.address),
+        (() => {
+          const customerMeta = [
+            customer.vat_number && `الرقم الضريبي: ${customer.vat_number}`,
+            customer.cr_number && `السجل التجاري: ${customer.cr_number}`,
+            customer.phone,
+            customer.address,
+          ]
+            .filter(Boolean)
+            .join("  •  ");
+          return customerMeta && React.createElement(Text, { style: styles.customerLine }, customerMeta);
+        })(),
       ),
 
       // ===== جدول البنود =====

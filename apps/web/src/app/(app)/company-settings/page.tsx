@@ -27,8 +27,6 @@ export default function CompanySettingsPage() {
           vat_number: form.vat_number,
           cr_number: form.cr_number,
           phone: form.phone,
-          email: form.email,
-          address: form.address,
         }),
       });
       setSaved(true);
@@ -66,18 +64,6 @@ export default function CompanySettingsPage() {
           placeholder="رقم الجوال"
           value={form.phone ?? ""}
           onChange={(e) => setForm({ ...form, phone: e.target.value })}
-        />
-        <input
-          className="input"
-          placeholder="البريد الإلكتروني"
-          value={form.email ?? ""}
-          onChange={(e) => setForm({ ...form, email: e.target.value })}
-        />
-        <input
-          className="input"
-          placeholder="العنوان"
-          value={form.address ?? ""}
-          onChange={(e) => setForm({ ...form, address: e.target.value })}
         />
 
         {error && <p className="text-sm text-red-600">{error}</p>}
