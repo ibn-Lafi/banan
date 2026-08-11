@@ -59,6 +59,8 @@ export default function InvoiceDetailsPage() {
   const [returnSaving, setReturnSaving] = useState(false);
   const [returnError, setReturnError] = useState<string | null>(null);
 
+  const [showPdfDocs, setShowPdfDocs] = useState(false);
+
   async function load() {
     const res = await apiFetch<{ data: InvoiceDetail }>(`/invoices/${id}`);
     setInvoice(res.data);
@@ -232,25 +234,24 @@ export default function InvoiceDetailsPage() {
   const canReturn = CAN_RETURN_STATUSES.includes(invoice.status) && returnableItems.length > 0;
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl font-bold">{invoice.invoice_number ?? "مسودة فاتورة"}</h1>
-            <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${statusMeta.className}`}>
-              {statusMeta.label}
-            </span>
-          </div>
-          <p className="text-sm text-gray-500">{invoice.customers?.name}</p>
-        </div>
         <button onClick={() => router.push("/invoices")} className="text-sm text-gray-500">
-          رجوع
+          ‹ رجوع
         </button>
+        <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${statusMeta.className}`}>
+          {statusMeta.label}
+        </span>
       </div>
 
       <div>
-        <h2 className="mb-2 text-sm font-semibold text-gray-700">المنتجات</h2>
-        <ul className="divide-y divide-gray-100 overflow-hidden rounded-xl border border-gray-200 bg-white">
+        <h1 className="text-xl font-bold">{invoice.invoice_number ?? "مسودة فاتورة"}</h1>
+        <p className="text-sm text-gray-500">{invoice.customers?.name}</p>
+      </div>
+
+      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
+        <p className="border-b border-gray-100 px-4 py-2.5 text-sm font-semibold text-gray-700">المنتجات</p>
+        <ul className="divide-y divide-gray-100">
           {invoice.invoice_items.map((item) => (
             <li key={item.id} className="flex items-center justify-between px-4 py-3">
               <div>
@@ -264,11 +265,7 @@ export default function InvoiceDetailsPage() {
             </li>
           ))}
         </ul>
-      </div>
-
-      <div>
-        <h2 className="mb-2 text-sm font-semibold text-gray-700">مراحل الفاتورة</h2>
-        <div className="space-y-2 rounded-xl border border-gray-200 bg-white p-4">
+        <div className="space-y-2 border-t border-gray-100 bg-gray-50 px-4 py-3">
           <StageRow label="الفاتورة الأصلية" sub={`شامل ضريبة ${invoice.original_vat_amount} ر.س`} value={invoice.original_amount_gross} />
           {invoice.balance.total_returns > 0 && (
             <StageRow
@@ -288,42 +285,6 @@ export default function InvoiceDetailsPage() {
 
       {error && <p className="text-sm text-red-600">{error}</p>}
 
-      {invoice.status !== "draft" && (
-        <div>
-          <h2 className="mb-2 text-sm font-semibold text-gray-700">مستندات PDF</h2>
-          <div className="space-y-2">
-            <PdfActions
-              stage="original"
-              label={PDF_STAGE_META.original}
-              loading={pdfLoading}
-              onView={handleViewPdf}
-              onDownload={handleDownloadPdf}
-              onShare={handleSharePdf}
-            />
-            {invoice.balance.total_returns > 0 && (
-              <PdfActions
-                stage="after_return"
-                label={PDF_STAGE_META.after_return}
-                loading={pdfLoading}
-                onView={handleViewPdf}
-                onDownload={handleDownloadPdf}
-                onShare={handleSharePdf}
-              />
-            )}
-            {invoice.balance.total_payments > 0 && (
-              <PdfActions
-                stage="final"
-                label={PDF_STAGE_META.final}
-                loading={pdfLoading}
-                onView={handleViewPdf}
-                onDownload={handleDownloadPdf}
-                onShare={handleSharePdf}
-              />
-            )}
-          </div>
-        </div>
-      )}
-
       {invoice.status === "draft" && (
         <button
           onClick={handleIssue}
@@ -335,91 +296,138 @@ export default function InvoiceDetailsPage() {
       )}
 
       {invoice.status !== "draft" && invoice.status !== "cancelled" && (
-        <>
-          <div>
-            <h2 className="mb-2 text-sm font-semibold text-gray-700">تسجيل دفعة</h2>
-            <form onSubmit={handleAddPayment} className="flex gap-2">
-              <input
-                type="number"
-                step="0.01"
-                min={0.01}
-                className="input"
-                placeholder="مبلغ الدفعة"
-                value={paymentAmount}
-                onChange={(e) => setPaymentAmount(e.target.value)}
-                required
+        <div className="rounded-xl border border-gray-200 bg-white p-4">
+          <h2 className="mb-2 text-sm font-semibold text-gray-700">تسجيل دفعة</h2>
+          <form onSubmit={handleAddPayment} className="flex gap-2">
+            <input
+              type="number"
+              step="0.01"
+              min={0.01}
+              className="input"
+              placeholder="مبلغ الدفعة"
+              value={paymentAmount}
+              onChange={(e) => setPaymentAmount(e.target.value)}
+              required
+            />
+            <button
+              type="submit"
+              disabled={busy}
+              className="whitespace-nowrap rounded-lg bg-brand-600 px-4 font-semibold text-white disabled:opacity-60"
+            >
+              تسجيل دفعة
+            </button>
+          </form>
+        </div>
+      )}
+
+      {invoice.status !== "draft" && (
+        <div>
+          <button
+            type="button"
+            onClick={() => setShowPdfDocs((v) => !v)}
+            className="flex w-full items-center justify-between rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700"
+          >
+            <span>مستندات PDF</span>
+            <span className="text-xs font-normal text-brand-600">{showPdfDocs ? "إخفاء" : "عرض"}</span>
+          </button>
+
+          {showPdfDocs && (
+            <div className="mt-2 space-y-2">
+              <PdfActions
+                stage="original"
+                label={PDF_STAGE_META.original}
+                loading={pdfLoading}
+                onView={handleViewPdf}
+                onDownload={handleDownloadPdf}
+                onShare={handleSharePdf}
               />
-              <button
-                type="submit"
-                disabled={busy}
-                className="whitespace-nowrap rounded-lg bg-brand-600 px-4 font-semibold text-white disabled:opacity-60"
-              >
-                تسجيل دفعة
-              </button>
-            </form>
-          </div>
-
-          {canReturn && (
-            <div>
-              <div className="mb-2 flex items-center justify-between">
-                <h2 className="text-sm font-semibold text-gray-700">مرتجع</h2>
-                <button
-                  type="button"
-                  onClick={() => setShowReturn((v) => !v)}
-                  className="text-sm font-semibold text-brand-600"
-                >
-                  {showReturn ? "إخفاء" : "+ تسجيل مرتجع"}
-                </button>
-              </div>
-
-              {showReturn && (
-                <form onSubmit={handleCreateReturn} className="space-y-3 rounded-xl border border-gray-200 bg-white p-4">
-                  {returnableItems.map((item) => (
-                    <div key={item.id} className="flex items-center justify-between gap-3">
-                      <div>
-                        <p className="text-sm font-medium">{item.product_name_snapshot}</p>
-                        <p className="text-xs text-gray-500">
-                          القابل للإرجاع: {item.remaining} {item.unit_name_snapshot ?? ""}
-                        </p>
-                      </div>
-                      <input
-                        type="number"
-                        min={0}
-                        max={item.remaining}
-                        step="0.001"
-                        className="input w-28"
-                        placeholder="0"
-                        value={returnQty[item.id] ?? ""}
-                        onChange={(e) => setReturnQty((prev) => ({ ...prev, [item.id]: e.target.value }))}
-                      />
-                    </div>
-                  ))}
-
-                  {returnError && <p className="text-sm text-red-600">{returnError}</p>}
-
-                  <button
-                    type="submit"
-                    disabled={returnSaving}
-                    className="w-full rounded-lg bg-brand-600 py-2.5 font-semibold text-white disabled:opacity-60"
-                  >
-                    {returnSaving ? "جارٍ الحفظ..." : "تسجيل المرتجع"}
-                  </button>
-                </form>
+              {invoice.balance.total_returns > 0 && (
+                <PdfActions
+                  stage="after_return"
+                  label={PDF_STAGE_META.after_return}
+                  loading={pdfLoading}
+                  onView={handleViewPdf}
+                  onDownload={handleDownloadPdf}
+                  onShare={handleSharePdf}
+                />
+              )}
+              {invoice.balance.total_payments > 0 && (
+                <PdfActions
+                  stage="final"
+                  label={PDF_STAGE_META.final}
+                  loading={pdfLoading}
+                  onView={handleViewPdf}
+                  onDownload={handleDownloadPdf}
+                  onShare={handleSharePdf}
+                />
               )}
             </div>
           )}
-
-          {invoice.balance.total_payments === 0 && invoice.balance.total_returns === 0 && (
-            <button
-              onClick={handleCancel}
-              disabled={busy}
-              className="w-full rounded-lg border border-red-200 py-2.5 font-semibold text-red-600 disabled:opacity-60"
-            >
-              إلغاء الفاتورة
-            </button>
-          )}
-        </>
+        </div>
       )}
+
+      {canReturn && (
+        <div>
+          <div className="mb-2 flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-gray-700">مرتجع</h2>
+            <button
+              type="button"
+              onClick={() => setShowReturn((v) => !v)}
+              className="text-sm font-semibold text-brand-600"
+            >
+              {showReturn ? "إخفاء" : "+ تسجيل مرتجع"}
+            </button>
+          </div>
+
+          {showReturn && (
+            <form onSubmit={handleCreateReturn} className="space-y-3 rounded-xl border border-gray-200 bg-white p-4">
+              {returnableItems.map((item) => (
+                <div key={item.id} className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-medium">{item.product_name_snapshot}</p>
+                    <p className="text-xs text-gray-500">
+                      القابل للإرجاع: {item.remaining} {item.unit_name_snapshot ?? ""}
+                    </p>
+                  </div>
+                  <input
+                    type="number"
+                    min={0}
+                    max={item.remaining}
+                    step="0.001"
+                    className="input w-28"
+                    placeholder="0"
+                    value={returnQty[item.id] ?? ""}
+                    onChange={(e) => setReturnQty((prev) => ({ ...prev, [item.id]: e.target.value }))}
+                  />
+                </div>
+              ))}
+
+              {returnError && <p className="text-sm text-red-600">{returnError}</p>}
+
+              <button
+                type="submit"
+                disabled={returnSaving}
+                className="w-full rounded-lg bg-brand-600 py-2.5 font-semibold text-white disabled:opacity-60"
+              >
+                {returnSaving ? "جارٍ الحفظ..." : "تسجيل المرتجع"}
+              </button>
+            </form>
+          )}
+        </div>
+      )}
+
+      {invoice.status !== "draft" &&
+        invoice.status !== "cancelled" &&
+        invoice.balance.total_payments === 0 &&
+        invoice.balance.total_returns === 0 && (
+          <button
+            onClick={handleCancel}
+            disabled={busy}
+            className="w-full rounded-lg border border-red-200 py-2.5 font-semibold text-red-600 disabled:opacity-60"
+          >
+            إلغاء الفاتورة
+          </button>
+        )}
     </div>
   );
 }
