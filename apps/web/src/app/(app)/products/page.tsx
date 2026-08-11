@@ -115,10 +115,9 @@ export default function ProductsPage() {
         />
         <input
           className="input"
-          placeholder="SKU"
+          placeholder="SKU (اختياري)"
           value={form.sku}
           onChange={(e) => setForm({ ...form, sku: e.target.value })}
-          required
         />
         <select
           className="input"
@@ -163,18 +162,18 @@ export default function ProductsPage() {
       </form>
 
       <ul className="divide-y divide-gray-100 overflow-hidden rounded-xl border border-gray-200 bg-white">
-        {products.map((p) => (
-          <li key={p.id} className="flex items-center justify-between px-4 py-3">
-            <div>
-              <p className="font-medium">{p.name}</p>
-              <p className="text-xs text-gray-500">
-                {p.sku}
-                {categoryName(p.category_id) ? ` — ${categoryName(p.category_id)}` : ""}
-              </p>
-            </div>
-            <p className="font-semibold">{p.price_gross} ر.س</p>
-          </li>
-        ))}
+        {products.map((p) => {
+          const meta = [p.sku, categoryName(p.category_id)].filter(Boolean).join("  •  ");
+          return (
+            <li key={p.id} className="flex items-center justify-between px-4 py-3">
+              <div>
+                <p className="font-medium">{p.name}</p>
+                {meta && <p className="text-xs text-gray-500">{meta}</p>}
+              </div>
+              <p className="font-semibold">{p.price_gross} ر.س</p>
+            </li>
+          );
+        })}
         {products.length === 0 && <li className="px-4 py-6 text-center text-sm text-gray-400">لا توجد منتجات</li>}
       </ul>
     </div>

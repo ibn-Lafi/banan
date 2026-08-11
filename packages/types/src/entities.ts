@@ -59,7 +59,7 @@ export interface Product {
   company_id: string;
   category_id: string | null;
   name: string;
-  sku: string;
+  sku: string | null;
   price_gross: number;
   vat_rate: number;
   status: ProductStatus;

@@ -88,60 +88,80 @@ export function CreateInvoiceForm({ onCreated }: { onCreated?: () => void }) {
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <label className="text-sm font-medium text-gray-700">المنتجات</label>
-          <button type="button" onClick={addLine} className="text-sm font-semibold text-brand-600">
+          <button
+            type="button"
+            onClick={addLine}
+            disabled={products.length === 0}
+            className="text-sm font-semibold text-brand-600 disabled:opacity-40"
+          >
             + إضافة منتج
           </button>
         </div>
 
-        {lines.map((line, index) => (
-          <div key={index} className="space-y-2 rounded-lg border border-gray-200 p-3">
-            <select
-              className="input"
-              value={line.product_id}
-              onChange={(e) => {
-                const product = products.find((p) => p.id === e.target.value);
-                updateLine(index, {
-                  product_id: e.target.value,
-                  unit_price: product ? Number(product.price_gross) : line.unit_price,
-                });
-              }}
-            >
-              {products.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
-            <div className="flex gap-2">
-              <input
-                type="number"
-                min={0.001}
-                step="0.001"
-                className="input"
-                value={line.quantity}
-                onChange={(e) => updateLine(index, { quantity: Number(e.target.value) })}
-                placeholder="الكمية"
-              />
-              <input
-                type="number"
-                min={0.01}
-                step="0.01"
-                className="input"
-                value={line.unit_price}
-                onChange={(e) => updateLine(index, { unit_price: Number(e.target.value) })}
-                placeholder="سعر الوحدة (شامل الضريبة)"
-              />
-              <button
-                type="button"
-                onClick={() => removeLine(index)}
-                className="rounded-lg border border-red-200 px-3 text-red-600"
-              >
-                حذف
-              </button>
+        {lines.map((line, index) => {
+          const lineTotal = line.quantity * line.unit_price;
+          return (
+            <div key={index} className="space-y-2 rounded-lg border border-gray-200 p-3">
+              <div className="flex items-center gap-2">
+                <select
+                  className="input flex-1"
+                  value={line.product_id}
+                  onChange={(e) => {
+                    const product = products.find((p) => p.id === e.target.value);
+                    updateLine(index, {
+                      product_id: e.target.value,
+                      unit_price: product ? Number(product.price_gross) : line.unit_price,
+                    });
+                  }}
+                >
+                  {products.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name} — {p.price_gross} ر.س
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  onClick={() => removeLine(index)}
+                  aria-label="حذف المنتج"
+                  className="rounded-lg border border-red-200 px-3 py-2 text-red-600"
+                >
+                  حذف
+                </button>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="flex-1">
+                  <label className="mb-1 block text-xs text-gray-500">الكمية</label>
+                  <input
+                    type="number"
+                    min={0.001}
+                    step="0.001"
+                    className="input"
+                    value={line.quantity}
+                    onChange={(e) => updateLine(index, { quantity: Number(e.target.value) })}
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="mb-1 block text-xs text-gray-500">سعر الوحدة (شامل الضريبة)</label>
+                  <input
+                    type="number"
+                    min={0.01}
+                    step="0.01"
+                    className="input"
+                    value={line.unit_price}
+                    onChange={(e) => updateLine(index, { unit_price: Number(e.target.value) })}
+                  />
+                </div>
+              </div>
+              <p className="text-left text-sm font-semibold text-gray-600">إجمالي السطر: {lineTotal.toFixed(2)} ر.س</p>
             </div>
-          </div>
-        ))}
-        {lines.length === 0 && <p className="text-sm text-gray-400">لا توجد منتجات في الفاتورة بعد</p>}
+          );
+        })}
+        {lines.length === 0 && (
+          <p className="rounded-lg bg-gray-50 py-6 text-center text-sm text-gray-400">
+            لا توجد منتجات في الفاتورة بعد — اضغط «+ إضافة منتج»
+          </p>
+        )}
       </div>
 
       <div className="rounded-lg bg-gray-100 px-4 py-3 text-lg font-bold">

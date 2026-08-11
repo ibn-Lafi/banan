@@ -2,7 +2,12 @@ import { z } from "zod";
 
 export const createProductSchema = z.object({
   name: z.string().min(1).max(200),
-  sku: z.string().min(1).max(60),
+  sku: z
+    .string()
+    .max(60)
+    .optional()
+    .nullable()
+    .transform((v) => (v && v.trim() ? v.trim() : null)),
   category_id: z.string().uuid().optional().nullable(),
   price_gross: z.number().positive(),
   vat_rate: z.number().min(0).max(1),
