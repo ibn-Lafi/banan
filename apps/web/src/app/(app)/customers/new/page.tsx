@@ -6,7 +6,7 @@ import { apiFetch, ApiRequestError } from "@/lib/apiClient";
 
 export default function NewCustomerPage() {
   const router = useRouter();
-  const [form, setForm] = useState({ name: "", vat_number: "", phone: "", address: "" });
+  const [form, setForm] = useState({ name: "", vat_number: "", cr_number: "", phone: "", address: "" });
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -41,6 +41,13 @@ export default function NewCustomerPage() {
             className="input"
             value={form.vat_number}
             onChange={(e) => setForm({ ...form, vat_number: e.target.value })}
+          />
+        </Field>
+        <Field label="السجل التجاري (اختياري)">
+          <input
+            className="input"
+            value={form.cr_number}
+            onChange={(e) => setForm({ ...form, cr_number: e.target.value })}
           />
         </Field>
         <Field label="رقم الجوال">

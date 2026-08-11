@@ -2,7 +2,6 @@ import { Router } from "express";
 import { createCategorySchema, createProductSchema, updateProductSchema } from "@banan/validation";
 import { asyncHandler } from "../middleware/asyncHandler.js";
 import { requireAuth } from "../middleware/auth.js";
-import { requireRole } from "../middleware/requireRole.js";
 import { supabaseAdmin } from "../lib/supabase.js";
 import { ApiError } from "../lib/ApiError.js";
 import { writeAuditLog } from "../services/auditService.js";
@@ -130,9 +129,9 @@ categoriesRouter.get(
   }),
 );
 
+// كيان تنظيمي مشترك مثل العملاء والمنتجات — أي مستخدم مسجّل دخوله يقدر يضيف تصنيف
 categoriesRouter.post(
   "/",
-  requireRole("admin"),
   asyncHandler(async (req, res) => {
     const input = createCategorySchema.parse(req.body);
     const { data, error } = await supabaseAdmin

@@ -2,19 +2,30 @@
 
 import { useEffect, useState } from "react";
 import { apiFetch, ApiRequestError } from "@/lib/apiClient";
-import type { Product } from "@banan/types";
+import type { Category, Product } from "@banan/types";
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
-  const [form, setForm] = useState({ name: "", sku: "", price_gross: "", vat_rate: "0.15" });
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [form, setForm] = useState({ name: "", sku: "", price_gross: "", vat_rate: "0.15", category_id: "" });
+  const [newCategoryName, setNewCategoryName] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [categoryError, setCategoryError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [savingCategory, setSavingCategory] = useState(false);
 
-  function load() {
+  function loadProducts() {
     apiFetch<{ data: Product[] }>("/products").then((res) => setProducts(res.data));
   }
 
-  useEffect(load, []);
+  function loadCategories() {
+    apiFetch<{ data: Category[] }>("/categories").then((res) => setCategories(res.data));
+  }
+
+  useEffect(() => {
+    loadProducts();
+    loadCategories();
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -28,10 +39,11 @@ export default function ProductsPage() {
           sku: form.sku,
           price_gross: Number(form.price_gross),
           vat_rate: Number(form.vat_rate),
+          category_id: form.category_id || null,
         }),
       });
-      setForm({ name: "", sku: "", price_gross: "", vat_rate: "0.15" });
-      load();
+      setForm({ name: "", sku: "", price_gross: "", vat_rate: "0.15", category_id: "" });
+      loadProducts();
     } catch (err) {
       setError(err instanceof ApiRequestError ? err.message : "تعذّر حفظ المنتج");
     } finally {
@@ -39,9 +51,58 @@ export default function ProductsPage() {
     }
   }
 
+  async function handleAddCategory(e: React.FormEvent) {
+    e.preventDefault();
+    setSavingCategory(true);
+    setCategoryError(null);
+    try {
+      await apiFetch("/categories", {
+        method: "POST",
+        body: JSON.stringify({ name: newCategoryName }),
+      });
+      setNewCategoryName("");
+      loadCategories();
+    } catch (err) {
+      setCategoryError(err instanceof ApiRequestError ? err.message : "تعذّر حفظ التصنيف");
+    } finally {
+      setSavingCategory(false);
+    }
+  }
+
+  const categoryName = (id: string | null) => categories.find((c) => c.id === id)?.name;
+
   return (
     <div className="space-y-6">
       <h1 className="text-xl font-bold">المنتجات</h1>
+
+      <form onSubmit={handleAddCategory} className="space-y-2 rounded-xl border border-gray-200 bg-white p-4">
+        <p className="text-sm font-semibold text-gray-700">التصنيفات</p>
+        <div className="flex flex-wrap gap-2">
+          {categories.map((c) => (
+            <span key={c.id} className="rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-600">
+              {c.name}
+            </span>
+          ))}
+          {categories.length === 0 && <span className="text-sm text-gray-400">لا توجد تصنيفات بعد</span>}
+        </div>
+        <div className="flex gap-2">
+          <input
+            className="input"
+            placeholder="اسم تصنيف جديد"
+            value={newCategoryName}
+            onChange={(e) => setNewCategoryName(e.target.value)}
+            required
+          />
+          <button
+            type="submit"
+            disabled={savingCategory}
+            className="whitespace-nowrap rounded-lg bg-brand-600 px-4 font-semibold text-white disabled:opacity-60"
+          >
+            إضافة
+          </button>
+        </div>
+        {categoryError && <p className="text-sm text-red-600">{categoryError}</p>}
+      </form>
 
       <form onSubmit={handleSubmit} className="space-y-2 rounded-xl border border-gray-200 bg-white p-4">
         <p className="text-sm font-semibold text-gray-700">إضافة منتج</p>
@@ -59,6 +120,18 @@ export default function ProductsPage() {
           onChange={(e) => setForm({ ...form, sku: e.target.value })}
           required
         />
+        <select
+          className="input"
+          value={form.category_id}
+          onChange={(e) => setForm({ ...form, category_id: e.target.value })}
+        >
+          <option value="">بدون تصنيف</option>
+          {categories.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.name}
+            </option>
+          ))}
+        </select>
         <div className="flex gap-2">
           <input
             type="number"
@@ -94,7 +167,10 @@ export default function ProductsPage() {
           <li key={p.id} className="flex items-center justify-between px-4 py-3">
             <div>
               <p className="font-medium">{p.name}</p>
-              <p className="text-xs text-gray-500">{p.sku}</p>
+              <p className="text-xs text-gray-500">
+                {p.sku}
+                {categoryName(p.category_id) ? ` — ${categoryName(p.category_id)}` : ""}
+              </p>
             </div>
             <p className="font-semibold">{p.price_gross} ر.س</p>
           </li>
