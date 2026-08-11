@@ -15,4 +15,7 @@ export const env = {
   supabaseServiceRoleKey: required("SUPABASE_SERVICE_ROLE_KEY"),
   supabaseAnonKey: required("SUPABASE_ANON_KEY"),
   corsOrigin: process.env.CORS_ORIGIN ?? "http://localhost:3000",
+  // يحمي صفحة الإعداد الأولي (/setup) من استخدامها من أي شخص غير مالك المشروع
+  // قبل أن يُكمل هو نفسه إنشاء أول شركة ومستخدم Admin.
+  setupToken: required("SETUP_TOKEN"),
 };

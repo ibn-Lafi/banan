@@ -7,3 +7,4 @@ export * from "./returns.js";
 export * from "./users.js";
 export * from "./company.js";
 export * from "./reports.js";
+export * from "./setup.js";

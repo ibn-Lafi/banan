@@ -46,12 +46,10 @@ pnpm dev:web   # http://localhost:3000
    - `Project URL` → `SUPABASE_URL`
    - `anon public key` → `SUPABASE_ANON_KEY`
    - `service_role key` (سري جداً) → `SUPABASE_SERVICE_ROLE_KEY`
-4. أنشئ أول شركة ومستخدم Admin يدوياً (لا توجد شاشة تسجيل عام في MVP):
-   - أدرج صفاً في جدول `companies`.
-   - من **Authentication → Users → Add User**، أنشئ مستخدماً بالبريد
-     `<أي-uuid>@users.banan.internal` (طابق هذا مع منطق `internalEmailFor`
-     في `apps/api/src/services/authService.ts`) — أو ببساطة أنشئ أول Admin
-     عبر استدعاء API لاحقاً بعد أن يكون هناك Admin أول (Bootstrap يدوي مرة واحدة).
+4. اختر رمزاً سرياً عشوائياً واضبطه كـ `SETUP_TOKEN` في بيئة الـ API.
+5. افتح `/setup` في الـ Frontend (مرة واحدة فقط) — صفحة إعداد أولي تُنشئ أول
+   شركة وأول مستخدم Admin بنموذج عادي بدون أي SQL يدوي. تُقفل تلقائياً بعد
+   أول استخدام ناجح.
 
 > ملاحظة معمارية: نستخدم Supabase Auth مع بريد داخلي مُشتق من `user.id`
 > (وليس username) — راجع OD-2 وتعليقات `authService.ts`.

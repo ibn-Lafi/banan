@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { setupRouter } from "./setup.routes.js";
 import { authRouter } from "./auth.routes.js";
 import { customersRouter } from "./customers.routes.js";
 import { categoriesRouter, productsRouter } from "./products.routes.js";
@@ -12,6 +13,7 @@ import { companySettingsRouter } from "./companySettings.routes.js";
 
 export const apiRouter = Router();
 
+apiRouter.use("/setup", setupRouter);
 apiRouter.use("/auth", authRouter);
 apiRouter.use("/customers", customersRouter);
 apiRouter.use("/products", productsRouter);
