@@ -31,10 +31,15 @@ export default function ReportsPage() {
     <div className="space-y-4">
       <h1 className="text-xl font-bold">التقارير</h1>
 
-      <div className="flex gap-2">
-        <input type="date" className="input" value={from} onChange={(e) => setFrom(e.target.value)} />
-        <input type="date" className="input" value={to} onChange={(e) => setTo(e.target.value)} />
-        <button onClick={load} className="whitespace-nowrap rounded-lg bg-brand-600 px-4 font-semibold text-white">
+      <div className="space-y-2">
+        <div className="grid grid-cols-2 gap-2">
+          <input type="date" className="input" value={from} onChange={(e) => setFrom(e.target.value)} />
+          <input type="date" className="input" value={to} onChange={(e) => setTo(e.target.value)} />
+        </div>
+        <button
+          onClick={load}
+          className="w-full rounded-lg bg-brand-600 py-2.5 font-semibold text-white"
+        >
           تطبيق
         </button>
       </div>
