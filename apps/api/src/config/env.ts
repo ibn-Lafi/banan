@@ -13,7 +13,7 @@ function required(name: string): string {
 export const env = {
   nodeEnv: process.env.NODE_ENV ?? "development",
   port: Number(process.env.PORT ?? 4000),
-  supabaseUrl: required("SUPABASE_URL"),
+  supabaseUrl: required("SUPABASE_URL").replace(/\/$/, ""),
   supabaseServiceRoleKey: required("SUPABASE_SERVICE_ROLE_KEY"),
   supabaseAnonKey: required("SUPABASE_ANON_KEY"),
   corsOrigin: (process.env.CORS_ORIGIN ?? "http://localhost:3000").trim().replace(/\/$/, ""),
