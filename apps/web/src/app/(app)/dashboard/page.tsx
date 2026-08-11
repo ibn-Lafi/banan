@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { apiFetch } from "@/lib/apiClient";
 import { getSession } from "@/lib/session";
-import { CreateInvoiceForm } from "@/components/CreateInvoiceForm";
 
 interface ReportSummary {
   invoices_count: number;
@@ -30,16 +30,18 @@ export default function DashboardPage() {
         <p className="text-sm text-gray-500">نظرة سريعة على أدائك</p>
       </div>
 
+      <Link
+        href="/invoices"
+        className="block rounded-xl bg-brand-600 px-4 py-3 text-center font-semibold text-white shadow-sm"
+      >
+        + إنشاء فاتورة جديدة
+      </Link>
+
       <div className="grid grid-cols-2 gap-3">
         <StatCard label="عدد الفواتير" value={summary?.invoices_count ?? "—"} />
         <StatCard label="إجمالي المبيعات" value={summary ? `${summary.total_sales} ر.س` : "—"} />
         <StatCard label="إجمالي المرتجعات" value={summary ? `${summary.total_returns} ر.س` : "—"} />
         <StatCard label="المبلغ المطلوب" value={summary ? `${summary.total_outstanding} ر.س` : "—"} />
-      </div>
-
-      <div className="rounded-xl border border-gray-200 bg-white p-4">
-        <h2 className="mb-4 text-lg font-bold">فاتورة جديدة</h2>
-        <CreateInvoiceForm />
       </div>
     </div>
   );
