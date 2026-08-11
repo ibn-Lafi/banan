@@ -41,9 +41,10 @@ const HEADER_FILL = NEUTRAL_FILL;
 
 const STATUS_META: Record<string, { label: string; bg: string; text: string }> = {
   draft: { label: "مسودة", bg: NEUTRAL_FILL, text: NEUTRAL_TEXT },
-  issued: { label: "صادرة", bg: NEUTRAL_FILL, text: NEUTRAL_TEXT },
+  issued: { label: "جديدة", bg: NEUTRAL_FILL, text: NEUTRAL_TEXT },
   partially_paid: { label: "مدفوعة جزئياً", bg: NEUTRAL_FILL, text: NEUTRAL_TEXT },
-  paid: { label: "مدفوعة بالكامل", bg: NEUTRAL_FILL, text: NEUTRAL_TEXT },
+  returned: { label: "مرتجع", bg: NEUTRAL_FILL, text: NEUTRAL_TEXT },
+  paid: { label: "منتهية", bg: NEUTRAL_FILL, text: NEUTRAL_TEXT },
   cancelled: { label: "ملغاة", bg: NEUTRAL_FILL, text: NEUTRAL_TEXT },
 };
 

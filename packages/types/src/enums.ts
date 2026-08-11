@@ -36,6 +36,7 @@ export const InvoiceStatus = {
   DRAFT: "draft",
   ISSUED: "issued",
   PARTIALLY_PAID: "partially_paid",
+  RETURNED: "returned",
   PAID: "paid",
   CANCELLED: "cancelled",
 } as const;

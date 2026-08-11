@@ -26,13 +26,14 @@ interface InvoiceDetail {
 
 const STATUS_META: Record<string, { label: string; className: string }> = {
   draft: { label: "مسودة", className: "bg-gray-100 text-gray-600" },
-  issued: { label: "صادرة", className: "bg-blue-50 text-blue-700" },
+  issued: { label: "جديدة", className: "bg-blue-50 text-blue-700" },
   partially_paid: { label: "مدفوعة جزئياً", className: "bg-amber-50 text-amber-700" },
-  paid: { label: "مدفوعة", className: "bg-green-50 text-green-700" },
+  returned: { label: "مرتجع", className: "bg-purple-50 text-purple-700" },
+  paid: { label: "منتهية", className: "bg-green-50 text-green-700" },
   cancelled: { label: "ملغاة", className: "bg-red-50 text-red-700" },
 };
 
-const CAN_RETURN_STATUSES = ["issued", "partially_paid", "paid"];
+const CAN_RETURN_STATUSES = ["issued", "partially_paid", "returned", "paid"];
 
 type PdfStage = "original" | "after_return" | "final";
 

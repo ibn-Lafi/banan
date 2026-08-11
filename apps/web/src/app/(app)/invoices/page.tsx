@@ -22,18 +22,20 @@ interface CustomerOption {
 
 const STATUS_META: Record<string, { label: string; className: string }> = {
   draft: { label: "مسودة", className: "bg-gray-100 text-gray-600" },
-  issued: { label: "صادرة", className: "bg-blue-50 text-blue-700" },
+  issued: { label: "جديدة", className: "bg-blue-50 text-blue-700" },
   partially_paid: { label: "مدفوعة جزئياً", className: "bg-amber-50 text-amber-700" },
-  paid: { label: "مدفوعة", className: "bg-green-50 text-green-700" },
+  returned: { label: "مرتجع", className: "bg-purple-50 text-purple-700" },
+  paid: { label: "منتهية", className: "bg-green-50 text-green-700" },
   cancelled: { label: "ملغاة", className: "bg-red-50 text-red-700" },
 };
 
 const FILTERS: { key: string; label: string }[] = [
   { key: "all", label: "الكل" },
   { key: "draft", label: "مسودة" },
-  { key: "issued", label: "صادرة" },
+  { key: "issued", label: "جديدة" },
   { key: "partially_paid", label: "مدفوعة جزئياً" },
-  { key: "paid", label: "مدفوعة" },
+  { key: "returned", label: "مرتجع" },
+  { key: "paid", label: "منتهية" },
   { key: "cancelled", label: "ملغاة" },
 ];
 

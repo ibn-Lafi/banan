@@ -69,12 +69,15 @@ export async function recomputeInvoiceStatus(invoiceId: string) {
   const balance = await getInvoiceBalance(invoiceId);
 
   // لا يوجد تاريخ استحقاق أو حالة "متأخرة" — الفاتورة الآجلة تبقى "issued"
-  // أو "partially_paid" إلى أن تُسدَّد بالكامل، متى ما دفع العميل.
+  // أو "partially_paid" إلى أن تُسدَّد بالكامل، متى ما دفع العميل. "returned"
+  // حالة وسيطة: صار عليها مرتجع لكن لم تُدفع منها أي دفعة بعد.
   let nextStatus: string;
   if (balance.outstanding_amount <= 0) {
     nextStatus = "paid";
   } else if (balance.total_payments > 0) {
     nextStatus = "partially_paid";
+  } else if (balance.total_returns > 0) {
+    nextStatus = "returned";
   } else {
     nextStatus = "issued";
   }

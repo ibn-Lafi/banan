@@ -26,7 +26,7 @@ export async function createReturn(input: CreateReturnInput, ctx: CreateReturnCo
   if (ctx.userRole === "rep" && invoice.rep_id !== ctx.userId) {
     throw ApiError.forbidden("لا يمكنك إنشاء مرتجع لفاتورة ليست لك");
   }
-  if (!["issued", "partially_paid", "paid"].includes(invoice.status)) {
+  if (!["issued", "partially_paid", "returned", "paid"].includes(invoice.status)) {
     throw ApiError.conflict("لا يمكن إنشاء مرتجع لفاتورة Draft أو ملغاة");
   }
 
