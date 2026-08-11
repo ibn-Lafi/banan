@@ -68,7 +68,7 @@ export default function InvoicesPage() {
                 </div>
                 <div className="text-left">
                   <p className="font-semibold">{invoice.original_amount_gross} ر.س</p>
-                  <p className="text-xs text-gray-400">{STATUS_LABELS[invoice.status] ?? invoice.status}</p>
+                  <p className="text-xs text-gray-400">{STATUS_LABELS[invoice.status] ?? STATUS_LABELS.issued}</p>
                 </div>
               </Link>
             </li>

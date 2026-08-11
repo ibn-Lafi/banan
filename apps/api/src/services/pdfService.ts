@@ -227,7 +227,7 @@ function InvoiceDocument({ company, customer, invoice, items, balance }: Invoice
         View,
         { style: styles.subHeaderRow },
         (() => {
-          const statusMeta = STATUS_META[invoice.status] ?? { label: invoice.status, bg: "#f3f4f6", text: "#374151" };
+          const statusMeta = STATUS_META[invoice.status] ?? STATUS_META.issued;
           return React.createElement(
             View,
             { style: [styles.statusBadge, { backgroundColor: statusMeta.bg }] },
