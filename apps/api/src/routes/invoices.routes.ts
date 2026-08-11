@@ -5,7 +5,7 @@ import { requireAuth } from "../middleware/auth.js";
 import { supabaseAdmin } from "../lib/supabase.js";
 import { ApiError } from "../lib/ApiError.js";
 import { writeAuditLog } from "../services/auditService.js";
-import { cancelInvoice, createInvoiceDraft, issueInvoice } from "../services/invoiceService.js";
+import { cancelInvoice, createInvoiceDraft, getInvoicePdf, issueInvoice } from "../services/invoiceService.js";
 import { getInvoiceBalance } from "../services/balanceService.js";
 
 export const invoicesRouter = Router();
@@ -182,8 +182,12 @@ invoicesRouter.get(
     if (invoice.status === "draft") {
       throw ApiError.conflict("يجب إصدار الفاتورة أولاً قبل توليد PDF");
     }
-    // OD-11: توليد PDF عبر Puppeteer (Server-side) + حفظ في Supabase Storage.
-    // غير مُنفَّذ بعد في هذا السكافولد الأولي.
-    throw new ApiError(501, "not_implemented", "توليد PDF غير مُنفَّذ بعد — انظر OD-11 في SPEC.md");
+    const pdfBuffer = await getInvoicePdf(invoice.id, { companyId: req.user!.company_id });
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      `inline; filename="${invoice.invoice_number ?? invoice.id}.pdf"`,
+    );
+    res.send(pdfBuffer);
   }),
 );

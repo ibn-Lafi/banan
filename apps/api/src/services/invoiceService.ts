@@ -2,6 +2,8 @@ import { calculateLineTax, sumInvoiceTotals, buildZatcaQrPayload } from "@banan/
 import type { CreateInvoiceDraftInput } from "@banan/validation";
 import { supabaseAdmin } from "../lib/supabase.js";
 import { ApiError } from "../lib/ApiError.js";
+import { getInvoiceBalance } from "./balanceService.js";
+import { generateInvoicePdf } from "./pdfService.js";
 
 export interface CreateDraftContext {
   companyId: string;
@@ -178,4 +180,49 @@ export async function cancelInvoice(invoiceId: string, ctx: { companyId: string 
     .single();
   if (error || !updated) throw error ?? new Error("Failed to cancel invoice");
   return updated;
+}
+
+/**
+ * القسم 14: توليد PDF للفاتورة Server-side وحفظه في Supabase Storage.
+ * يُعاد التوليد في كل طلب (وليس مخزَّناً بشكل دائم كنسخة نهائية) لأن الرصيد
+ * (المرتجعات/الدفعات) يمكن أن يتغيّر بعد الإصدار ويجب أن يظهر محدَّثاً في الـ PDF —
+ * النسخة في Storage تبقى نسخة احتياطية/أرشيفية يتم استبدالها (upsert) في كل مرة.
+ */
+export async function getInvoicePdf(invoiceId: string, ctx: { companyId: string }): Promise<Buffer> {
+  const { data: invoice, error: invoiceError } = await supabaseAdmin
+    .from("invoices")
+    .select("*, customers(*), invoice_items(*)")
+    .eq("id", invoiceId)
+    .eq("company_id", ctx.companyId)
+    .single();
+  if (invoiceError || !invoice) throw ApiError.notFound("الفاتورة غير موجودة");
+
+  const { data: company, error: companyError } = await supabaseAdmin
+    .from("companies")
+    .select("*")
+    .eq("id", ctx.companyId)
+    .single();
+  if (companyError || !company) throw ApiError.notFound("بيانات الشركة غير مكتملة");
+
+  const balance = await getInvoiceBalance(invoiceId);
+
+  const pdfBuffer = await generateInvoicePdf({
+    company,
+    customer: invoice.customers,
+    invoice,
+    items: invoice.invoice_items,
+    balance,
+  });
+
+  const storagePath = `${ctx.companyId}/${invoiceId}.pdf`;
+  const { error: uploadError } = await supabaseAdmin.storage
+    .from("invoice-pdfs")
+    .upload(storagePath, pdfBuffer, { contentType: "application/pdf", upsert: true });
+  if (uploadError) {
+    // فشل الحفظ في Storage لا يجب أن يمنع تسليم PDF للمستخدم الآن
+    // eslint-disable-next-line no-console
+    console.error("Failed to persist invoice PDF to storage", uploadError);
+  }
+
+  return pdfBuffer;
 }

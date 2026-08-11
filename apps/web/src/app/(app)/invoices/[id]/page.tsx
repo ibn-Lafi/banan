@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { apiFetch, ApiRequestError } from "@/lib/apiClient";
+import { apiFetch, apiFetchBlob, ApiRequestError } from "@/lib/apiClient";
 
 interface InvoiceItem {
   id: string;
@@ -30,6 +30,7 @@ export default function InvoiceDetailsPage() {
   const router = useRouter();
   const [invoice, setInvoice] = useState<InvoiceDetail | null>(null);
   const [busy, setBusy] = useState(false);
+  const [pdfLoading, setPdfLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [paymentAmount, setPaymentAmount] = useState("");
 
@@ -67,6 +68,21 @@ export default function InvoiceDetailsPage() {
       setError(err instanceof ApiRequestError ? err.message : "تعذّر إلغاء الفاتورة");
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function handleDownloadPdf() {
+    setPdfLoading(true);
+    setError(null);
+    try {
+      const blob = await apiFetchBlob(`/invoices/${id}/pdf`);
+      const url = URL.createObjectURL(blob);
+      window.open(url, "_blank");
+      setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    } catch (err) {
+      setError(err instanceof ApiRequestError ? err.message : "تعذّر توليد PDF");
+    } finally {
+      setPdfLoading(false);
     }
   }
 
@@ -131,6 +147,16 @@ export default function InvoiceDetailsPage() {
       </div>
 
       {error && <p className="text-sm text-red-600">{error}</p>}
+
+      {invoice.status !== "draft" && (
+        <button
+          onClick={handleDownloadPdf}
+          disabled={pdfLoading}
+          className="w-full rounded-lg border border-brand-600 py-2.5 font-semibold text-brand-600 disabled:opacity-60"
+        >
+          {pdfLoading ? "جارٍ التجهيز..." : "عرض / تحميل PDF"}
+        </button>
+      )}
 
       {invoice.status === "draft" && (
         <button

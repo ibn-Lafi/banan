@@ -81,7 +81,12 @@ pnpm dev:web   # http://localhost:3000
 - ✅ منطق الضريبة/التقريب/الرصيد (مُختبر في `packages/shared`)
 - ✅ API: auth, customers, products, categories, invoices (draft/issue/cancel),
   payments, returns, reports, users, audit-logs, company-settings
-- ✅ Web: تسجيل دخول، Dashboard، عملاء، منتجات، فاتورة (إنشاء/مراجعة/إصدار/دفعة)،
+- ✅ Web: تسجيل دخول، Dashboard، عملاء، منتجات + تصنيفات، فاتورة (إنشاء/مراجعة/إصدار/دفعة)،
   تقارير، مستخدمون، سجل عمليات، إعدادات شركة — Responsive (Bottom Nav / Sidebar)
-- ⏳ غير مُنفَّذ بعد: توليد PDF فعلي (OD-11)، رفع شعار الشركة لـ Storage،
-  شاشة إنشاء مرتجع من واجهة الفاتورة، Offline handling، اختبارات API/E2E
+- ✅ توليد PDF فعلي للفاتورة (OD-11): `@react-pdf/renderer` + خط Cairo عربي
+  مُضمَّن (Arabic+Latin مدموجين لدعم التشكيل الصحيح) + QR بصيغة ZATCA Phase 1،
+  يُحفظ في Supabase Storage (`invoice-pdfs`) ويُعاد توليده في كل طلب ليعكس
+  آخر رصيد (مرتجعات/دفعات). زر "عرض/تحميل PDF" في صفحة تفاصيل الفاتورة.
+- ⏳ غير مُنفَّذ بعد: رفع شعار الشركة لـ Storage (منطق دمجه بالـ PDF جاهز إن
+  توفر `logo_url`)، شاشة إنشاء مرتجع من واجهة الفاتورة، Offline handling،
+  اختبارات API/E2E

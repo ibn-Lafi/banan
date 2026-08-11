@@ -1,0 +1,7 @@
+Cairo font family — SIL Open Font License, Version 1.1
+Copyright 2016 The Cairo Project Authors (https://github.com/Gue3bara/Cairo)
+
+These .ttf files are the Regular/Bold weights of Cairo (Arabic + Latin
+subsets merged into a single file per weight for PDF text-shaping
+purposes), originally distributed via Google Fonts / @fontsource/cairo
+under the SIL Open Font License 1.1: https://openfontlicense.org/

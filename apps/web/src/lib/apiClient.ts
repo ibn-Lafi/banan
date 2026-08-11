@@ -48,3 +48,24 @@ export async function apiFetch<T>(
   if (res.status === 204) return undefined as T;
   return res.json() as Promise<T>;
 }
+
+/** لطلبات ترجع ملفاً ثنائياً (مثل PDF) بدل JSON — يحتاج نفس مصادقة apiFetch */
+export async function apiFetchBlob(path: string): Promise<Blob> {
+  const session = getSession();
+  const headers = new Headers();
+  if (session) headers.set("Authorization", `Bearer ${session.access_token}`);
+
+  const res = await fetch(`${API_URL}/api${path}`, { headers });
+
+  if (res.status === 401) {
+    clearSession();
+    if (typeof window !== "undefined") window.location.href = "/login";
+  }
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => null);
+    throw new ApiRequestError(res.status, body?.error?.message ?? "تعذّر تحميل الملف", body?.error?.code);
+  }
+
+  return res.blob();
+}
