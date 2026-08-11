@@ -26,53 +26,132 @@ function ensureFontsRegistered() {
   fontsRegistered = true;
 }
 
+// لوحة ألوان مطابقة لهوية الواجهة (apps/web/tailwind.config.ts -> brand)
+const BRAND = "#0a7e58";
+const BRAND_DARK = "#086346";
+const BRAND_LIGHT = "#eefaf3";
+const INK = "#111827";
+const GRAY = "#6b7280";
+const GRAY_LIGHT = "#9ca3af";
+const BORDER = "#e5e7eb";
+const ROW_ALT = "#f9fafb";
+
+const STATUS_META: Record<string, { label: string; bg: string; text: string }> = {
+  draft: { label: "مسودة", bg: "#f3f4f6", text: "#374151" },
+  issued: { label: "صادرة", bg: "#eff6ff", text: "#1d4ed8" },
+  due: { label: "آجلة", bg: "#eff6ff", text: "#1d4ed8" },
+  partially_paid: { label: "مدفوعة جزئياً", bg: "#fffbeb", text: "#b45309" },
+  paid: { label: "مدفوعة", bg: BRAND_LIGHT, text: BRAND_DARK },
+  overdue: { label: "متأخرة", bg: "#fef2f2", text: "#b91c1c" },
+  cancelled: { label: "ملغاة", bg: "#f3f4f6", text: "#6b7280" },
+};
+
 const styles = StyleSheet.create({
-  page: { fontFamily: "Cairo", direction: "rtl", padding: 32, fontSize: 10, color: "#1f2937" },
-  headerRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: 20 },
-  companyBlock: { maxWidth: "60%" },
-  companyName: { fontSize: 16, fontWeight: "bold", marginBottom: 4 },
-  metaBlock: { alignItems: "flex-end" },
-  invoiceTitle: { fontSize: 14, fontWeight: "bold", marginBottom: 6 },
-  small: { fontSize: 9, color: "#4b5563", marginBottom: 2 },
-  qrImage: { width: 90, height: 90, marginBottom: 6 },
-  section: { marginBottom: 16 },
-  sectionTitle: { fontSize: 11, fontWeight: "bold", marginBottom: 6 },
-  card: { border: "1px solid #e5e7eb", borderRadius: 4, padding: 10 },
-  row: { flexDirection: "row", justifyContent: "space-between", marginBottom: 3 },
-  table: { border: "1px solid #e5e7eb", borderRadius: 4, overflow: "hidden" },
-  tableHeaderRow: {
-    flexDirection: "row",
-    backgroundColor: "#f3f4f6",
-    borderBottom: "1px solid #e5e7eb",
-    paddingVertical: 6,
-    paddingHorizontal: 8,
+  page: {
+    fontFamily: "Cairo",
+    direction: "rtl",
+    fontSize: 10,
+    color: INK,
+    paddingTop: 0,
+    paddingBottom: 54,
+    paddingHorizontal: 0,
   },
+  accentBar: { height: 8, backgroundColor: BRAND },
+  content: { paddingHorizontal: 36, paddingTop: 28 },
+
+  headerRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 22 },
+  companyBlock: { maxWidth: "58%" },
+  companyName: { fontSize: 17, fontWeight: "bold", color: INK, marginBottom: 6 },
+  metaLine: { fontSize: 9, color: GRAY, marginBottom: 2, lineHeight: 1.5 },
+
+  metaBlock: { alignItems: "flex-end" },
+  invoiceKicker: { fontSize: 9, fontWeight: "bold", color: BRAND, marginBottom: 3, letterSpacing: 0.5 },
+  invoiceNumber: { fontSize: 18, fontWeight: "bold", color: INK, marginBottom: 8 },
+  statusPill: { borderRadius: 10, paddingVertical: 3, paddingHorizontal: 10, marginBottom: 10 },
+  statusPillText: { fontSize: 8, fontWeight: "bold" },
+  qrImage: { width: 78, height: 78, marginBottom: 4 },
+  qrCaption: { fontSize: 7, color: GRAY_LIGHT },
+
+  divider: { borderBottom: `1px solid ${BORDER}`, marginBottom: 20 },
+
+  metaGrid: { flexDirection: "row", justifyContent: "space-between", marginBottom: 22 },
+  metaGridCol: { width: "31%" },
+  metaGridLabel: { fontSize: 8, color: GRAY_LIGHT, marginBottom: 3 },
+  metaGridValue: { fontSize: 10, fontWeight: "bold", color: INK },
+
+  billToLabel: {
+    fontSize: 8,
+    fontWeight: "bold",
+    color: BRAND_DARK,
+    backgroundColor: BRAND_LIGHT,
+    alignSelf: "flex-start",
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+    borderRadius: 3,
+    marginBottom: 8,
+  },
+  customerCard: { border: `1px solid ${BORDER}`, borderRadius: 6, padding: 12, marginBottom: 20 },
+  customerName: { fontSize: 12, fontWeight: "bold", marginBottom: 4 },
+  customerLine: { fontSize: 9, color: GRAY, marginBottom: 2 },
+
+  table: { border: `1px solid ${BORDER}`, borderRadius: 6, overflow: "hidden", marginBottom: 4 },
+  tableHeaderRow: { flexDirection: "row", backgroundColor: BRAND, paddingVertical: 8, paddingHorizontal: 10 },
   tableRow: {
     flexDirection: "row",
-    borderBottom: "1px solid #f3f4f6",
-    paddingVertical: 6,
-    paddingHorizontal: 8,
+    borderTop: `1px solid ${BORDER}`,
+    paddingVertical: 7,
+    paddingHorizontal: 10,
   },
-  th: { fontWeight: "bold", fontSize: 9 },
-  td: { fontSize: 9 },
-  colProduct: { flexGrow: 1, flexBasis: 0 },
-  colNum: { width: 60, textAlign: "center" },
-  totalsBlock: { marginTop: 14, alignItems: "flex-end" },
-  totalsCard: { width: 220, border: "1px solid #e5e7eb", borderRadius: 4, padding: 10 },
-  totalsRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: 3 },
-  totalsRowBold: { flexDirection: "row", justifyContent: "space-between", fontWeight: "bold", fontSize: 11 },
-  footer: { position: "absolute", bottom: 24, left: 32, right: 32, fontSize: 8, color: "#9ca3af", textAlign: "center" },
-});
+  th: { fontWeight: "bold", fontSize: 8.5, color: "#ffffff" },
+  td: { fontSize: 9, color: INK },
+  tdMuted: { fontSize: 8, color: GRAY_LIGHT, marginTop: 1 },
+  colProduct: { flexGrow: 2.6, flexBasis: 0, paddingLeft: 6 },
+  colNum: { flexGrow: 1, flexBasis: 0, textAlign: "center" },
 
-const STATUS_LABELS: Record<string, string> = {
-  draft: "مسودة",
-  issued: "صادرة",
-  due: "آجلة",
-  partially_paid: "مدفوعة جزئياً",
-  paid: "مدفوعة",
-  overdue: "متأخرة",
-  cancelled: "ملغاة",
-};
+  totalsWrap: { flexDirection: "row", justifyContent: "space-between", marginTop: 18 },
+  notesBlock: { maxWidth: "45%", justifyContent: "flex-end" },
+  notesText: { fontSize: 8, color: GRAY_LIGHT, lineHeight: 1.5 },
+
+  totalsCard: { width: 230, border: `1px solid ${BORDER}`, borderRadius: 6, padding: 14 },
+  totalsRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: 6 },
+  totalsLabel: { fontSize: 9, color: GRAY },
+  totalsValue: { fontSize: 9, color: INK },
+  grandTotalRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    backgroundColor: BRAND,
+    borderRadius: 4,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    marginTop: 4,
+  },
+  grandTotalLabel: { fontSize: 10, fontWeight: "bold", color: "#ffffff" },
+  grandTotalValue: { fontSize: 12, fontWeight: "bold", color: "#ffffff" },
+
+  adjustmentsBlock: { marginTop: 10, paddingTop: 10, borderTop: `1px dashed ${BORDER}` },
+  outstandingRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 4,
+    paddingTop: 8,
+    borderTop: `1px solid ${BORDER}`,
+  },
+  outstandingLabel: { fontSize: 10, fontWeight: "bold", color: INK },
+  outstandingValue: { fontSize: 12, fontWeight: "bold", color: BRAND_DARK },
+
+  footer: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingVertical: 14,
+    paddingHorizontal: 36,
+    borderTop: `1px solid ${BORDER}`,
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  footerText: { fontSize: 7.5, color: GRAY_LIGHT },
+});
 
 function money(value: number) {
   return `${value.toFixed(2)} ر.س`;
@@ -82,8 +161,8 @@ function money(value: number) {
 // ISO "2026-08-11") داخل سياق RTL لأن الشرطة حرف محايد بين أرقام "ضعيفة" الاتجاه.
 // علامات يونيكود LRI/PDI غير موجودة في خط Cairo المُضمَّن، فنستخدم بدلاً منها
 // Text متداخل بخاصية direction: "ltr" ليبقى المقطع بصرياً كما هو دون قلب.
-function LtrSpan(value: string) {
-  return React.createElement(Text, { style: { direction: "ltr" } }, value);
+function LtrSpan(value: string, style?: object) {
+  return React.createElement(Text, { style: { direction: "ltr", ...style } }, value);
 }
 
 export interface InvoicePdfInput {
@@ -105,15 +184,33 @@ async function buildQrImage(payload: string | null): Promise<string | null> {
   try {
     // payload مخزَّن كنص TLV مُرمَّز Base64 (القسم 14.1) — نولّد صورة QR تُشفّر
     // نفس هذا النص، وهذا ما تتوقعه أي قارئ متوافق مع ZATCA Phase 1 عند المسح.
-    return await QRCode.toDataURL(payload, { margin: 1, width: 300 });
+    return await QRCode.toDataURL(payload, { margin: 0, width: 300, color: { dark: INK } });
   } catch {
     return null;
   }
 }
 
+function StatusPill(status: string) {
+  const meta = STATUS_META[status] ?? { label: status, bg: "#f3f4f6", text: "#374151" };
+  return React.createElement(
+    View,
+    { style: [styles.statusPill, { backgroundColor: meta.bg }] },
+    React.createElement(Text, { style: [styles.statusPillText, { color: meta.text }] }, meta.label),
+  );
+}
+
 function InvoiceDocument({ company, customer, invoice, items, balance }: InvoicePdfInput, qrDataUrl: string | null) {
   const hasReturns = balance.total_returns > 0;
   const hasPayments = balance.total_payments > 0;
+  const hasAdjustments = hasReturns || hasPayments;
+
+  const companyMeta = [
+    company.vat_number && `الرقم الضريبي: ${company.vat_number}`,
+    company.cr_number && `السجل التجاري: ${company.cr_number}`,
+  ]
+    .filter(Boolean)
+    .join("   |   ");
+  const companyContact = [company.phone, company.email].filter(Boolean).join("   |   ");
 
   return React.createElement(
     Document,
@@ -121,168 +218,212 @@ function InvoiceDocument({ company, customer, invoice, items, balance }: Invoice
     React.createElement(
       Page,
       { size: "A4", style: styles.page },
+      React.createElement(View, { style: styles.accentBar }),
       React.createElement(
         View,
-        { style: styles.headerRow },
+        { style: styles.content },
+
+        // رأس الفاتورة: بيانات الشركة يمين، عنوان الفاتورة ورقمها وحالتها ورمز QR يسار
         React.createElement(
           View,
-          { style: styles.companyBlock },
-          React.createElement(Text, { style: styles.companyName }, company.name),
-          company.vat_number &&
-            React.createElement(Text, { style: styles.small }, `الرقم الضريبي: ${company.vat_number}`),
-          company.cr_number &&
-            React.createElement(Text, { style: styles.small }, `السجل التجاري: ${company.cr_number}`),
-          company.phone && React.createElement(Text, { style: styles.small }, `الجوال: ${company.phone}`),
-          company.email && React.createElement(Text, { style: styles.small }, `البريد: ${company.email}`),
-          company.address && React.createElement(Text, { style: styles.small }, company.address),
-        ),
-        React.createElement(
-          View,
-          { style: styles.metaBlock },
-          qrDataUrl && React.createElement(Image, { src: qrDataUrl, style: styles.qrImage }),
+          { style: styles.headerRow },
           React.createElement(
-            Text,
-            { style: styles.invoiceTitle },
-            invoice.invoice_type === "simplified" ? "فاتورة ضريبية مبسّطة" : "فاتورة ضريبية",
+            View,
+            { style: styles.companyBlock },
+            React.createElement(Text, { style: styles.companyName }, company.name),
+            companyMeta && React.createElement(Text, { style: styles.metaLine }, companyMeta),
+            companyContact && React.createElement(Text, { style: styles.metaLine }, companyContact),
+            company.address && React.createElement(Text, { style: styles.metaLine }, company.address),
           ),
-          React.createElement(Text, { style: styles.small }, `رقم الفاتورة: ${invoice.invoice_number ?? "—"}`),
           React.createElement(
-            Text,
-            { style: styles.small },
-            "تاريخ الفاتورة: ",
-            LtrSpan(invoice.invoice_date),
+            View,
+            { style: styles.metaBlock },
+            qrDataUrl &&
+              React.createElement(
+                View,
+                { style: { alignItems: "center" } },
+                React.createElement(Image, { src: qrDataUrl, style: styles.qrImage }),
+                React.createElement(Text, { style: styles.qrCaption }, "رمز التحقق الإلكتروني"),
+              ),
+          ),
+        ),
+
+        React.createElement(
+          View,
+          { style: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 18 } },
+          React.createElement(
+            View,
+            null,
+            React.createElement(
+              Text,
+              { style: styles.invoiceKicker },
+              invoice.invoice_type === "simplified" ? "فاتورة ضريبية مبسّطة" : "فاتورة ضريبية",
+            ),
+            React.createElement(Text, { style: styles.invoiceNumber }, invoice.invoice_number ?? "—"),
+          ),
+          StatusPill(invoice.status),
+        ),
+
+        React.createElement(View, { style: styles.divider }),
+
+        // شبكة تواريخ الفاتورة
+        React.createElement(
+          View,
+          { style: styles.metaGrid },
+          React.createElement(
+            View,
+            { style: styles.metaGridCol },
+            React.createElement(Text, { style: styles.metaGridLabel }, "تاريخ الفاتورة"),
+            LtrSpan(invoice.invoice_date, styles.metaGridValue),
           ),
           invoice.due_date &&
             React.createElement(
-              Text,
-              { style: styles.small },
-              "تاريخ الاستحقاق: ",
-              LtrSpan(invoice.due_date),
+              View,
+              { style: styles.metaGridCol },
+              React.createElement(Text, { style: styles.metaGridLabel }, "تاريخ الاستحقاق"),
+              LtrSpan(invoice.due_date, styles.metaGridValue),
             ),
           invoice.issued_at &&
             React.createElement(
-              Text,
-              { style: styles.small },
-              "وقت الإصدار: ",
-              LtrSpan(invoice.issued_at),
+              View,
+              { style: styles.metaGridCol },
+              React.createElement(Text, { style: styles.metaGridLabel }, "وقت الإصدار"),
+              LtrSpan(invoice.issued_at, { ...styles.metaGridValue, fontSize: 8.5 }),
             ),
-          React.createElement(
-            Text,
-            { style: styles.small },
-            `الحالة: ${STATUS_LABELS[invoice.status] ?? invoice.status}`,
-          ),
         ),
-      ),
 
-      React.createElement(
-        View,
-        { style: styles.section },
-        React.createElement(Text, { style: styles.sectionTitle }, "بيانات العميل"),
+        // بيانات العميل
+        React.createElement(Text, { style: styles.billToLabel }, "فوترة إلى"),
         React.createElement(
           View,
-          { style: styles.card },
-          React.createElement(Text, { style: styles.small }, customer.name),
+          { style: styles.customerCard },
+          React.createElement(Text, { style: styles.customerName }, customer.name),
           customer.vat_number &&
-            React.createElement(Text, { style: styles.small }, `الرقم الضريبي: ${customer.vat_number}`),
+            React.createElement(Text, { style: styles.customerLine }, `الرقم الضريبي: ${customer.vat_number}`),
           customer.cr_number &&
-            React.createElement(Text, { style: styles.small }, `السجل التجاري: ${customer.cr_number}`),
-          customer.phone && React.createElement(Text, { style: styles.small }, `الجوال: ${customer.phone}`),
-          customer.address && React.createElement(Text, { style: styles.small }, customer.address),
+            React.createElement(Text, { style: styles.customerLine }, `السجل التجاري: ${customer.cr_number}`),
+          customer.phone && React.createElement(Text, { style: styles.customerLine }, `الجوال: ${customer.phone}`),
+          customer.address && React.createElement(Text, { style: styles.customerLine }, customer.address),
         ),
-      ),
 
-      React.createElement(
-        View,
-        { style: styles.table },
+        // جدول البنود
         React.createElement(
           View,
-          { style: styles.tableHeaderRow },
-          React.createElement(Text, { style: [styles.th, styles.colProduct] }, "المنتج"),
-          React.createElement(Text, { style: [styles.th, styles.colNum] }, "الكمية"),
-          React.createElement(Text, { style: [styles.th, styles.colNum] }, "سعر الوحدة"),
-          React.createElement(Text, { style: [styles.th, styles.colNum] }, "قبل الضريبة"),
-          React.createElement(Text, { style: [styles.th, styles.colNum] }, "الضريبة"),
-          React.createElement(Text, { style: [styles.th, styles.colNum] }, "الإجمالي"),
-        ),
-        ...items.map((item) =>
+          { style: styles.table },
           React.createElement(
             View,
-            { style: styles.tableRow, key: item.id },
-            React.createElement(Text, { style: [styles.td, styles.colProduct] }, item.product_name_snapshot),
-            React.createElement(Text, { style: [styles.td, styles.colNum] }, String(item.quantity)),
-            React.createElement(Text, { style: [styles.td, styles.colNum] }, item.unit_price.toFixed(2)),
-            React.createElement(Text, { style: [styles.td, styles.colNum] }, item.line_net.toFixed(2)),
-            React.createElement(Text, { style: [styles.td, styles.colNum] }, item.line_vat.toFixed(2)),
-            React.createElement(Text, { style: [styles.td, styles.colNum] }, item.line_gross.toFixed(2)),
+            { style: styles.tableHeaderRow },
+            React.createElement(Text, { style: [styles.th, styles.colProduct] }, "المنتج"),
+            React.createElement(Text, { style: [styles.th, styles.colNum] }, "الكمية"),
+            React.createElement(Text, { style: [styles.th, styles.colNum] }, "سعر الوحدة"),
+            React.createElement(Text, { style: [styles.th, styles.colNum] }, "قبل الضريبة"),
+            React.createElement(Text, { style: [styles.th, styles.colNum] }, "الضريبة"),
+            React.createElement(Text, { style: [styles.th, styles.colNum] }, "الإجمالي"),
           ),
-        ),
-      ),
-
-      React.createElement(
-        View,
-        { style: styles.totalsBlock },
-        React.createElement(
-          View,
-          { style: styles.totalsCard },
-          React.createElement(
-            View,
-            { style: styles.totalsRow },
-            React.createElement(Text, null, "الإجمالي قبل الضريبة"),
-            React.createElement(Text, null, money(invoice.original_amount_net)),
-          ),
-          React.createElement(
-            View,
-            { style: styles.totalsRow },
-            React.createElement(Text, null, "إجمالي الضريبة"),
-            React.createElement(Text, null, money(invoice.original_vat_amount)),
-          ),
-          React.createElement(
-            View,
-            { style: styles.totalsRowBold },
-            React.createElement(Text, null, "الإجمالي شامل الضريبة"),
-            React.createElement(Text, null, money(invoice.original_amount_gross)),
-          ),
-
-          // القسم 14: إن تأثرت الفاتورة بمرتجع أو دفعة، تُعرض التفاصيل بوضوح
-          (hasReturns || hasPayments) &&
+          ...items.map((item, index) =>
             React.createElement(
               View,
-              { style: { marginTop: 8, paddingTop: 8, borderTop: "1px solid #e5e7eb" } },
-              hasReturns &&
-                React.createElement(
-                  View,
-                  { style: styles.totalsRow },
-                  React.createElement(Text, null, "إجمالي المرتجعات"),
-                  React.createElement(Text, null, `- ${money(balance.total_returns)}`),
-                ),
-              hasReturns &&
-                React.createElement(
-                  View,
-                  { style: styles.totalsRow },
-                  React.createElement(Text, null, "المبلغ الحالي بعد المرتجعات"),
-                  React.createElement(Text, null, money(balance.current_amount_gross)),
-                ),
-              hasPayments &&
-                React.createElement(
-                  View,
-                  { style: styles.totalsRow },
-                  React.createElement(Text, null, "إجمالي المدفوع"),
-                  React.createElement(Text, null, money(balance.total_payments)),
-                ),
+              {
+                style: [styles.tableRow, index % 2 === 1 ? { backgroundColor: ROW_ALT } : {}],
+                key: item.id,
+              },
+              React.createElement(
+                Text,
+                { style: [styles.td, styles.colProduct] },
+                item.product_name_snapshot,
+                item.returned_quantity > 0
+                  ? React.createElement(Text, { style: styles.tdMuted }, `  (مرتجع: ${item.returned_quantity})`)
+                  : null,
+              ),
+              React.createElement(Text, { style: [styles.td, styles.colNum] }, String(item.quantity)),
+              React.createElement(Text, { style: [styles.td, styles.colNum] }, item.unit_price.toFixed(2)),
+              React.createElement(Text, { style: [styles.td, styles.colNum] }, item.line_net.toFixed(2)),
+              React.createElement(Text, { style: [styles.td, styles.colNum] }, item.line_vat.toFixed(2)),
+              React.createElement(Text, { style: [styles.td, styles.colNum] }, item.line_gross.toFixed(2)),
+            ),
+          ),
+        ),
+
+        // الإجماليات
+        React.createElement(
+          View,
+          { style: styles.totalsWrap },
+          React.createElement(
+            View,
+            { style: styles.notesBlock },
+            React.createElement(
+              Text,
+              { style: styles.notesText },
+              "فاتورة متوافقة مع المرحلة الأولى (Phase 1) من نظام الفوترة الإلكترونية السعودي — ZATCA. تُصدَر هذه الوثيقة إلكترونياً ولا تتطلب توقيعاً أو ختماً.",
+            ),
+          ),
+          React.createElement(
+            View,
+            { style: styles.totalsCard },
+            React.createElement(
+              View,
+              { style: styles.totalsRow },
+              React.createElement(Text, { style: styles.totalsLabel }, "الإجمالي قبل الضريبة"),
+              React.createElement(Text, { style: styles.totalsValue }, money(invoice.original_amount_net)),
+            ),
+            React.createElement(
+              View,
+              { style: styles.totalsRow },
+              React.createElement(Text, { style: styles.totalsLabel }, "إجمالي الضريبة (15%)"),
+              React.createElement(Text, { style: styles.totalsValue }, money(invoice.original_vat_amount)),
+            ),
+            React.createElement(
+              View,
+              { style: styles.grandTotalRow },
+              React.createElement(Text, { style: styles.grandTotalLabel }, "الإجمالي شامل الضريبة"),
+              React.createElement(Text, { style: styles.grandTotalValue }, money(invoice.original_amount_gross)),
+            ),
+
+            // القسم 14: إن تأثرت الفاتورة بمرتجع أو دفعة، تُعرض التفاصيل بوضوح
+            hasAdjustments &&
               React.createElement(
                 View,
-                { style: styles.totalsRowBold },
-                React.createElement(Text, null, "المتبقي"),
-                React.createElement(Text, null, money(balance.outstanding_amount)),
+                { style: styles.adjustmentsBlock },
+                hasReturns &&
+                  React.createElement(
+                    View,
+                    { style: styles.totalsRow },
+                    React.createElement(Text, { style: styles.totalsLabel }, "إجمالي المرتجعات"),
+                    React.createElement(Text, { style: [styles.totalsValue, { color: "#b91c1c" }] }, `- ${money(balance.total_returns)}`),
+                  ),
+                hasReturns &&
+                  React.createElement(
+                    View,
+                    { style: styles.totalsRow },
+                    React.createElement(Text, { style: styles.totalsLabel }, "المبلغ الحالي بعد المرتجعات"),
+                    React.createElement(Text, { style: styles.totalsValue }, money(balance.current_amount_gross)),
+                  ),
+                hasPayments &&
+                  React.createElement(
+                    View,
+                    { style: styles.totalsRow },
+                    React.createElement(Text, { style: styles.totalsLabel }, "إجمالي المدفوع"),
+                    React.createElement(Text, { style: [styles.totalsValue, { color: BRAND_DARK }] }, money(balance.total_payments)),
+                  ),
+                React.createElement(
+                  View,
+                  { style: styles.outstandingRow },
+                  React.createElement(Text, { style: styles.outstandingLabel }, "المتبقي"),
+                  React.createElement(Text, { style: styles.outstandingValue }, money(balance.outstanding_amount)),
+                ),
               ),
-            ),
+          ),
         ),
       ),
 
       React.createElement(
-        Text,
-        { style: styles.footer },
-        "فاتورة متوافقة مع المرحلة الأولى (Phase 1) من نظام الفوترة الإلكترونية السعودي — ZATCA",
+        View,
+        { style: styles.footer, fixed: true },
+        React.createElement(Text, { style: styles.footerText }, company.name),
+        React.createElement(
+          Text,
+          { style: styles.footerText, render: ({ pageNumber, totalPages }) => `صفحة ${pageNumber} من ${totalPages}` },
+        ),
       ),
     ),
   );
