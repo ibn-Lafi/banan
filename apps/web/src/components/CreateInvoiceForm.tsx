@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiFetch, ApiRequestError } from "@/lib/apiClient";
-import type { Customer, Product } from "@banan/types";
+import type { Customer, Product, Unit } from "@banan/types";
 
 interface DraftLine {
   product_id: string;
@@ -16,6 +16,7 @@ export function CreateInvoiceForm({ onCreated }: { onCreated?: () => void }) {
   const router = useRouter();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
+  const [units, setUnits] = useState<Unit[]>([]);
   const [customerId, setCustomerId] = useState("");
   const [lines, setLines] = useState<DraftLine[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -24,7 +25,10 @@ export function CreateInvoiceForm({ onCreated }: { onCreated?: () => void }) {
   useEffect(() => {
     apiFetch<{ data: Customer[] }>("/customers").then((res) => setCustomers(res.data));
     apiFetch<{ data: Product[] }>("/products").then((res) => setProducts(res.data));
+    apiFetch<{ data: Unit[] }>("/units").then((res) => setUnits(res.data));
   }, []);
+
+  const unitName = (id: string | null) => units.find((u) => u.id === id)?.name;
 
   function addLine() {
     if (products.length === 0) return;
@@ -100,6 +104,8 @@ export function CreateInvoiceForm({ onCreated }: { onCreated?: () => void }) {
 
         {lines.map((line, index) => {
           const lineTotal = line.quantity * line.unit_price;
+          const selectedProduct = products.find((p) => p.id === line.product_id);
+          const selectedUnitName = selectedProduct ? unitName(selectedProduct.unit_id) : undefined;
           return (
             <div key={index} className="space-y-2 rounded-lg border border-gray-200 p-3">
               <div className="flex items-center gap-2">
@@ -116,7 +122,8 @@ export function CreateInvoiceForm({ onCreated }: { onCreated?: () => void }) {
                 >
                   {products.map((p) => (
                     <option key={p.id} value={p.id}>
-                      {p.name} — {p.price_gross} ر.س
+                      {p.name}
+                      {unitName(p.unit_id) ? ` (${unitName(p.unit_id)})` : ""} — {p.price_gross} ر.س
                     </option>
                   ))}
                 </select>
@@ -131,7 +138,9 @@ export function CreateInvoiceForm({ onCreated }: { onCreated?: () => void }) {
               </div>
               <div className="flex items-center gap-2">
                 <div className="flex-1">
-                  <label className="mb-1 block text-xs text-gray-500">الكمية</label>
+                  <label className="mb-1 block text-xs text-gray-500">
+                    الكمية{selectedUnitName ? ` (${selectedUnitName})` : ""}
+                  </label>
                   <input
                     type="number"
                     min={0.001}

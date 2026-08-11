@@ -332,7 +332,11 @@ function InvoiceDocument(
                 ? React.createElement(Text, { style: styles.tdMuted }, `  (مرتجع: ${item.returned_quantity})`)
                 : null,
             ),
-            React.createElement(Text, { style: [styles.td, styles.colNum] }, String(item.quantity)),
+            React.createElement(
+              Text,
+              { style: [styles.td, styles.colNum] },
+              item.unit_name_snapshot ? `${item.quantity} ${item.unit_name_snapshot}` : String(item.quantity),
+            ),
             React.createElement(Text, { style: [styles.td, styles.colNum] }, item.unit_price.toFixed(2)),
             React.createElement(Text, { style: [styles.td, styles.colNum] }, item.line_net.toFixed(2)),
             React.createElement(Text, { style: [styles.td, styles.colNum] }, item.line_vat.toFixed(2)),

@@ -9,6 +9,7 @@ export const createProductSchema = z.object({
     .nullable()
     .transform((v) => (v && v.trim() ? v.trim() : null)),
   category_id: z.string().uuid().optional().nullable(),
+  unit_id: z.string().uuid().optional().nullable(),
   price_gross: z.number().positive(),
   vat_rate: z.number().min(0).max(1),
 });
@@ -23,3 +24,8 @@ export const createCategorySchema = z.object({
   name: z.string().min(1).max(120),
 });
 export type CreateCategoryInput = z.infer<typeof createCategorySchema>;
+
+export const createUnitSchema = z.object({
+  name: z.string().min(1).max(60),
+});
+export type CreateUnitInput = z.infer<typeof createUnitSchema>;

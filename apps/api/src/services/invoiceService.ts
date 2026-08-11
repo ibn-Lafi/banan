@@ -15,7 +15,7 @@ export async function createInvoiceDraft(input: CreateInvoiceDraftInput, ctx: Cr
   const productIds = input.items.map((item) => item.product_id);
   const { data: products, error: productsError } = await supabaseAdmin
     .from("products")
-    .select("id, name, price_gross, vat_rate, status")
+    .select("id, name, price_gross, vat_rate, status, units(name)")
     .eq("company_id", ctx.companyId)
     .in("id", productIds);
 
@@ -37,9 +37,11 @@ export async function createInvoiceDraft(input: CreateInvoiceDraftInput, ctx: Cr
       quantity: item.quantity,
       vatRate: Number(product.vat_rate),
     });
+    const unit = product.units as unknown as { name: string } | null;
     return {
       product_id: product.id,
       product_name_snapshot: product.name,
+      unit_name_snapshot: unit?.name ?? null,
       quantity: item.quantity,
       product_base_price: Number(product.price_gross),
       unit_price: item.unit_price,

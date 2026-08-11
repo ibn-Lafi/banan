@@ -7,6 +7,7 @@ import { apiFetch, apiFetchBlob, ApiRequestError } from "@/lib/apiClient";
 interface InvoiceItem {
   id: string;
   product_name_snapshot: string;
+  unit_name_snapshot: string | null;
   quantity: number;
   unit_price: number;
   line_gross: number;
@@ -197,7 +198,7 @@ export default function InvoiceDetailsPage() {
               <div>
                 <p className="text-sm font-medium">{item.product_name_snapshot}</p>
                 <p className="text-xs text-gray-500">
-                  {item.quantity} × {item.unit_price} ر.س
+                  {item.quantity} {item.unit_name_snapshot ?? ""} × {item.unit_price} ر.س
                   {item.returned_quantity > 0 && ` — مرتجع: ${item.returned_quantity}`}
                 </p>
               </div>
@@ -308,7 +309,9 @@ export default function InvoiceDetailsPage() {
                     <div key={item.id} className="flex items-center justify-between gap-3">
                       <div>
                         <p className="text-sm font-medium">{item.product_name_snapshot}</p>
-                        <p className="text-xs text-gray-500">القابل للإرجاع: {item.remaining}</p>
+                        <p className="text-xs text-gray-500">
+                          القابل للإرجاع: {item.remaining} {item.unit_name_snapshot ?? ""}
+                        </p>
                       </div>
                       <input
                         type="number"

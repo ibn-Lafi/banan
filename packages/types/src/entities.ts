@@ -54,10 +54,18 @@ export interface Category {
   created_at: string;
 }
 
+export interface Unit {
+  id: string;
+  company_id: string;
+  name: string;
+  created_at: string;
+}
+
 export interface Product {
   id: string;
   company_id: string;
   category_id: string | null;
+  unit_id: string | null;
   name: string;
   sku: string | null;
   price_gross: number;
@@ -93,6 +101,7 @@ export interface InvoiceItem {
   invoice_id: string;
   product_id: string;
   product_name_snapshot: string;
+  unit_name_snapshot: string | null;
   quantity: number;
   product_base_price: number;
   unit_price: number;

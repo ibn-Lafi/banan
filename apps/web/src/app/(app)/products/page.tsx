@@ -2,16 +2,24 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { apiFetch, ApiRequestError } from "@/lib/apiClient";
-import type { Category, Product } from "@banan/types";
+import type { Category, Product, Unit } from "@banan/types";
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [units, setUnits] = useState<Unit[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterCategory, setFilterCategory] = useState("all");
 
   const [showCreate, setShowCreate] = useState(false);
-  const [form, setForm] = useState({ name: "", sku: "", price_gross: "", vat_rate: "0.15", category_id: "" });
+  const [form, setForm] = useState({
+    name: "",
+    sku: "",
+    price_gross: "",
+    vat_rate: "0.15",
+    category_id: "",
+    unit_id: "",
+  });
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -19,6 +27,11 @@ export default function ProductsPage() {
   const [newCategoryName, setNewCategoryName] = useState("");
   const [categoryError, setCategoryError] = useState<string | null>(null);
   const [savingCategory, setSavingCategory] = useState(false);
+
+  const [showUnits, setShowUnits] = useState(false);
+  const [newUnitName, setNewUnitName] = useState("");
+  const [unitError, setUnitError] = useState<string | null>(null);
+  const [savingUnit, setSavingUnit] = useState(false);
 
   function loadProducts() {
     apiFetch<{ data: Product[] }>("/products")
@@ -30,9 +43,14 @@ export default function ProductsPage() {
     apiFetch<{ data: Category[] }>("/categories").then((res) => setCategories(res.data));
   }
 
+  function loadUnits() {
+    apiFetch<{ data: Unit[] }>("/units").then((res) => setUnits(res.data));
+  }
+
   useEffect(() => {
     loadProducts();
     loadCategories();
+    loadUnits();
   }, []);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -48,9 +66,10 @@ export default function ProductsPage() {
           price_gross: Number(form.price_gross),
           vat_rate: Number(form.vat_rate),
           category_id: form.category_id || null,
+          unit_id: form.unit_id || null,
         }),
       });
-      setForm({ name: "", sku: "", price_gross: "", vat_rate: "0.15", category_id: "" });
+      setForm({ name: "", sku: "", price_gross: "", vat_rate: "0.15", category_id: "", unit_id: "" });
       setShowCreate(false);
       loadProducts();
     } catch (err) {
@@ -78,7 +97,26 @@ export default function ProductsPage() {
     }
   }
 
+  async function handleAddUnit(e: React.FormEvent) {
+    e.preventDefault();
+    setSavingUnit(true);
+    setUnitError(null);
+    try {
+      await apiFetch("/units", {
+        method: "POST",
+        body: JSON.stringify({ name: newUnitName }),
+      });
+      setNewUnitName("");
+      loadUnits();
+    } catch (err) {
+      setUnitError(err instanceof ApiRequestError ? err.message : "تعذّر حفظ الوحدة");
+    } finally {
+      setSavingUnit(false);
+    }
+  }
+
   const categoryName = (id: string | null) => categories.find((c) => c.id === id)?.name;
+  const unitName = (id: string | null) => units.find((u) => u.id === id)?.name;
 
   const filtered = useMemo(
     () => (filterCategory === "all" ? products : products.filter((p) => p.category_id === filterCategory)),
@@ -106,13 +144,13 @@ export default function ProductsPage() {
             onChange={(e) => setForm({ ...form, name: e.target.value })}
             required
           />
+          <input
+            className="input"
+            placeholder="SKU (اختياري)"
+            value={form.sku}
+            onChange={(e) => setForm({ ...form, sku: e.target.value })}
+          />
           <div className="flex gap-2">
-            <input
-              className="input"
-              placeholder="SKU (اختياري)"
-              value={form.sku}
-              onChange={(e) => setForm({ ...form, sku: e.target.value })}
-            />
             <select
               className="input"
               value={form.category_id}
@@ -122,6 +160,18 @@ export default function ProductsPage() {
               {categories.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name}
+                </option>
+              ))}
+            </select>
+            <select
+              className="input"
+              value={form.unit_id}
+              onChange={(e) => setForm({ ...form, unit_id: e.target.value })}
+            >
+              <option value="">بدون وحدة</option>
+              {units.map((u) => (
+                <option key={u.id} value={u.id}>
+                  {u.name}
                 </option>
               ))}
             </select>
@@ -164,43 +214,74 @@ export default function ProductsPage() {
         </form>
       )}
 
-      <div>
-        <button
-          onClick={() => setShowCategories((v) => !v)}
-          className="text-sm font-semibold text-brand-600"
-        >
+      <div className="flex gap-4">
+        <button onClick={() => setShowCategories((v) => !v)} className="text-sm font-semibold text-brand-600">
           {showCategories ? "إخفاء التصنيفات" : "إدارة التصنيفات"}
         </button>
-        {showCategories && (
-          <form onSubmit={handleAddCategory} className="mt-2 space-y-2 rounded-xl border border-gray-200 bg-white p-4">
-            <div className="flex flex-wrap gap-2">
-              {categories.map((c) => (
-                <span key={c.id} className="rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-600">
-                  {c.name}
-                </span>
-              ))}
-              {categories.length === 0 && <span className="text-sm text-gray-400">لا توجد تصنيفات بعد</span>}
-            </div>
-            <div className="flex gap-2">
-              <input
-                className="input"
-                placeholder="اسم تصنيف جديد"
-                value={newCategoryName}
-                onChange={(e) => setNewCategoryName(e.target.value)}
-                required
-              />
-              <button
-                type="submit"
-                disabled={savingCategory}
-                className="whitespace-nowrap rounded-lg bg-brand-600 px-4 font-semibold text-white disabled:opacity-60"
-              >
-                إضافة
-              </button>
-            </div>
-            {categoryError && <p className="text-sm text-red-600">{categoryError}</p>}
-          </form>
-        )}
+        <button onClick={() => setShowUnits((v) => !v)} className="text-sm font-semibold text-brand-600">
+          {showUnits ? "إخفاء الوحدات" : "إدارة الوحدات"}
+        </button>
       </div>
+
+      {showCategories && (
+        <form onSubmit={handleAddCategory} className="space-y-2 rounded-xl border border-gray-200 bg-white p-4">
+          <div className="flex flex-wrap gap-2">
+            {categories.map((c) => (
+              <span key={c.id} className="rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-600">
+                {c.name}
+              </span>
+            ))}
+            {categories.length === 0 && <span className="text-sm text-gray-400">لا توجد تصنيفات بعد</span>}
+          </div>
+          <div className="flex gap-2">
+            <input
+              className="input"
+              placeholder="اسم تصنيف جديد"
+              value={newCategoryName}
+              onChange={(e) => setNewCategoryName(e.target.value)}
+              required
+            />
+            <button
+              type="submit"
+              disabled={savingCategory}
+              className="whitespace-nowrap rounded-lg bg-brand-600 px-4 font-semibold text-white disabled:opacity-60"
+            >
+              إضافة
+            </button>
+          </div>
+          {categoryError && <p className="text-sm text-red-600">{categoryError}</p>}
+        </form>
+      )}
+
+      {showUnits && (
+        <form onSubmit={handleAddUnit} className="space-y-2 rounded-xl border border-gray-200 bg-white p-4">
+          <div className="flex flex-wrap gap-2">
+            {units.map((u) => (
+              <span key={u.id} className="rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-600">
+                {u.name}
+              </span>
+            ))}
+            {units.length === 0 && <span className="text-sm text-gray-400">لا توجد وحدات بعد</span>}
+          </div>
+          <div className="flex gap-2">
+            <input
+              className="input"
+              placeholder="اسم وحدة جديدة (بوكس، علبة...)"
+              value={newUnitName}
+              onChange={(e) => setNewUnitName(e.target.value)}
+              required
+            />
+            <button
+              type="submit"
+              disabled={savingUnit}
+              className="whitespace-nowrap rounded-lg bg-brand-600 px-4 font-semibold text-white disabled:opacity-60"
+            >
+              إضافة
+            </button>
+          </div>
+          {unitError && <p className="text-sm text-red-600">{unitError}</p>}
+        </form>
+      )}
 
       {categories.length > 0 && (
         <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1">
@@ -233,7 +314,7 @@ export default function ProductsPage() {
       ) : (
         <ul className="divide-y divide-gray-100 overflow-hidden rounded-xl border border-gray-200 bg-white">
           {filtered.map((p) => {
-            const meta = [p.sku, categoryName(p.category_id)].filter(Boolean).join("  •  ");
+            const meta = [p.sku, categoryName(p.category_id), unitName(p.unit_id)].filter(Boolean).join("  •  ");
             return (
               <li key={p.id} className="flex items-center justify-between px-4 py-3">
                 <div>

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createCategorySchema, createProductSchema, updateProductSchema } from "@banan/validation";
+import { createCategorySchema, createProductSchema, createUnitSchema, updateProductSchema } from "@banan/validation";
 import { asyncHandler } from "../middleware/asyncHandler.js";
 import { requireAuth } from "../middleware/auth.js";
 import { supabaseAdmin } from "../lib/supabase.js";
@@ -136,6 +136,37 @@ categoriesRouter.post(
     const input = createCategorySchema.parse(req.body);
     const { data, error } = await supabaseAdmin
       .from("categories")
+      .insert({ ...input, company_id: req.user!.company_id })
+      .select()
+      .single();
+    if (error) throw error;
+    res.status(201).json({ data });
+  }),
+);
+
+export const unitsRouter = Router();
+unitsRouter.use(requireAuth);
+
+unitsRouter.get(
+  "/",
+  asyncHandler(async (req, res) => {
+    const { data, error } = await supabaseAdmin
+      .from("units")
+      .select("*")
+      .eq("company_id", req.user!.company_id)
+      .order("name");
+    if (error) throw error;
+    res.json({ data });
+  }),
+);
+
+// وحدة قياس المنتج (بوكس / علبة ...) — كيان تنظيمي مشترك بنفس نمط التصنيفات
+unitsRouter.post(
+  "/",
+  asyncHandler(async (req, res) => {
+    const input = createUnitSchema.parse(req.body);
+    const { data, error } = await supabaseAdmin
+      .from("units")
       .insert({ ...input, company_id: req.user!.company_id })
       .select()
       .single();
