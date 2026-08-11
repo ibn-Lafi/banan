@@ -26,11 +26,8 @@ function ensureFontsRegistered() {
   fontsRegistered = true;
 }
 
-// ترتيب/تخطيط رسمي كلاسيكي (خطوط فاصلة، جداول مسطّرة، عناوين واضحة) بألوان
-// هوية الواجهة (apps/web/tailwind.config.ts -> brand) بدل الأبيض والأسود البحت.
-const BRAND = "#0a7e58";
-const BRAND_DARK = "#086346";
-const BRAND_LIGHT = "#eefaf3";
+// ترتيب/تخطيط رسمي كلاسيكي (خطوط فاصلة، جداول مسطّرة، عناوين واضحة) بدون أي
+// تلوين قوي — رمادي فاتح محايد فقط (نفس روح أول نسخة قبل أي تجربة ألوان).
 const INK = "#111827";
 const INK_SOFT = "#1f2937";
 const GRAY = "#6b7280";
@@ -38,16 +35,18 @@ const GRAY_LIGHT = "#9ca3af";
 const BORDER = "#e5e7eb";
 const BORDER_LIGHT = "#f0f0f0";
 const ROW_ALT = "#f9fafb";
-const HEADER_FILL = BRAND;
+const NEUTRAL_FILL = "#f3f4f6";
+const NEUTRAL_TEXT = "#374151";
+const HEADER_FILL = NEUTRAL_FILL;
 
 const STATUS_META: Record<string, { label: string; bg: string; text: string }> = {
-  draft: { label: "مسودة", bg: "#f3f4f6", text: "#374151" },
-  issued: { label: "صادرة", bg: "#eff6ff", text: "#1d4ed8" },
-  due: { label: "آجلة", bg: "#eff6ff", text: "#1d4ed8" },
-  partially_paid: { label: "مدفوعة جزئياً", bg: "#fffbeb", text: "#b45309" },
-  paid: { label: "مدفوعة بالكامل", bg: BRAND_LIGHT, text: BRAND_DARK },
-  overdue: { label: "متأخرة السداد", bg: "#fef2f2", text: "#b91c1c" },
-  cancelled: { label: "ملغاة", bg: "#f3f4f6", text: "#6b7280" },
+  draft: { label: "مسودة", bg: NEUTRAL_FILL, text: NEUTRAL_TEXT },
+  issued: { label: "صادرة", bg: NEUTRAL_FILL, text: NEUTRAL_TEXT },
+  due: { label: "آجلة", bg: NEUTRAL_FILL, text: NEUTRAL_TEXT },
+  partially_paid: { label: "مدفوعة جزئياً", bg: NEUTRAL_FILL, text: NEUTRAL_TEXT },
+  paid: { label: "مدفوعة بالكامل", bg: NEUTRAL_FILL, text: NEUTRAL_TEXT },
+  overdue: { label: "متأخرة السداد", bg: NEUTRAL_FILL, text: NEUTRAL_TEXT },
+  cancelled: { label: "ملغاة", bg: NEUTRAL_FILL, text: NEUTRAL_TEXT },
 };
 
 const styles = StyleSheet.create({
@@ -68,14 +67,14 @@ const styles = StyleSheet.create({
   metaLine: { fontSize: 8.5, color: GRAY, marginBottom: 2, lineHeight: 1.5 },
 
   invoiceBlock: { alignItems: "flex-end" },
-  invoiceTitle: { fontSize: 20, fontWeight: "bold", color: BRAND, letterSpacing: 1, marginBottom: 3 },
+  invoiceTitle: { fontSize: 20, fontWeight: "bold", color: INK, letterSpacing: 1, marginBottom: 3 },
   invoiceTypeLabel: { fontSize: 8, color: GRAY, marginBottom: 10 },
   invoiceMetaTable: { alignItems: "flex-end" },
   invoiceMetaRow: { flexDirection: "row", marginBottom: 3 },
   invoiceMetaLabel: { fontSize: 8.5, color: GRAY, marginLeft: 10 },
   invoiceMetaValue: { fontSize: 8.5, fontWeight: "bold", color: INK },
 
-  headerRule: { borderBottom: `2px solid ${BRAND}`, marginTop: 18, marginBottom: 16 },
+  headerRule: { borderBottom: `2px solid ${INK}`, marginTop: 18, marginBottom: 16 },
 
   // ===== شريط رقم الفاتورة + الحالة =====
   subHeaderRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 20 },
@@ -88,8 +87,8 @@ const styles = StyleSheet.create({
   billToLabel: {
     fontSize: 8.5,
     fontWeight: "bold",
-    color: BRAND_DARK,
-    backgroundColor: BRAND_LIGHT,
+    color: NEUTRAL_TEXT,
+    backgroundColor: NEUTRAL_FILL,
     alignSelf: "flex-start",
     paddingVertical: 3,
     paddingHorizontal: 9,
@@ -105,7 +104,7 @@ const styles = StyleSheet.create({
   table: { marginBottom: 4 },
   tableHeaderRow: { flexDirection: "row", backgroundColor: HEADER_FILL, paddingVertical: 7, paddingHorizontal: 8 },
   tableRow: { flexDirection: "row", paddingVertical: 7, paddingHorizontal: 8, borderBottom: `1px solid ${BORDER_LIGHT}` },
-  th: { fontWeight: "bold", fontSize: 8, color: "#ffffff" },
+  th: { fontWeight: "bold", fontSize: 8, color: NEUTRAL_TEXT },
   td: { fontSize: 9, color: INK_SOFT },
   tdMuted: { fontSize: 7.5, color: GRAY_LIGHT },
   colIndex: { width: 20, textAlign: "center" },
@@ -135,8 +134,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginTop: 6,
   },
-  grandTotalLabel: { fontSize: 10, fontWeight: "bold", color: "#ffffff" },
-  grandTotalValue: { fontSize: 13, fontWeight: "bold", color: "#ffffff" },
+  grandTotalLabel: { fontSize: 10, fontWeight: "bold", color: INK },
+  grandTotalValue: { fontSize: 13, fontWeight: "bold", color: INK },
 
   adjustmentsBlock: { marginTop: 10, paddingTop: 8, borderTop: `1px dashed ${BORDER}` },
   outstandingRow: {
@@ -144,10 +143,10 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginTop: 4,
     paddingTop: 8,
-    borderTop: `2px solid ${BRAND}`,
+    borderTop: `2px solid ${INK}`,
   },
   outstandingLabel: { fontSize: 10, fontWeight: "bold", color: INK },
-  outstandingValue: { fontSize: 13, fontWeight: "bold", color: BRAND_DARK },
+  outstandingValue: { fontSize: 13, fontWeight: "bold", color: INK },
 
   // ===== QR =====
   qrBlock: { alignItems: "center", marginTop: 16 },
@@ -395,7 +394,7 @@ function InvoiceDocument({ company, customer, invoice, items, balance }: Invoice
                   View,
                   { style: styles.totalsRow },
                   React.createElement(Text, { style: styles.totalsLabel }, "إجمالي المرتجعات"),
-                  React.createElement(Text, { style: [styles.totalsValue, { color: "#b91c1c" }] }, `- ${money(balance.total_returns)}`),
+                  React.createElement(Text, { style: styles.totalsValue }, `- ${money(balance.total_returns)}`),
                 ),
               hasReturns &&
                 React.createElement(
@@ -409,7 +408,7 @@ function InvoiceDocument({ company, customer, invoice, items, balance }: Invoice
                   View,
                   { style: styles.totalsRow },
                   React.createElement(Text, { style: styles.totalsLabel }, "إجمالي المدفوع"),
-                  React.createElement(Text, { style: [styles.totalsValue, { color: BRAND_DARK }] }, `- ${money(balance.total_payments)}`),
+                  React.createElement(Text, { style: styles.totalsValue }, `- ${money(balance.total_payments)}`),
                 ),
               React.createElement(
                 View,
