@@ -42,10 +42,8 @@ const HEADER_FILL = NEUTRAL_FILL;
 const STATUS_META: Record<string, { label: string; bg: string; text: string }> = {
   draft: { label: "مسودة", bg: NEUTRAL_FILL, text: NEUTRAL_TEXT },
   issued: { label: "صادرة", bg: NEUTRAL_FILL, text: NEUTRAL_TEXT },
-  due: { label: "آجلة", bg: NEUTRAL_FILL, text: NEUTRAL_TEXT },
   partially_paid: { label: "مدفوعة جزئياً", bg: NEUTRAL_FILL, text: NEUTRAL_TEXT },
   paid: { label: "مدفوعة بالكامل", bg: NEUTRAL_FILL, text: NEUTRAL_TEXT },
-  overdue: { label: "متأخرة السداد", bg: NEUTRAL_FILL, text: NEUTRAL_TEXT },
   cancelled: { label: "ملغاة", bg: NEUTRAL_FILL, text: NEUTRAL_TEXT },
 };
 
@@ -56,7 +54,7 @@ const styles = StyleSheet.create({
     fontSize: 9.5,
     color: INK_SOFT,
     paddingTop: 40,
-    paddingBottom: 50,
+    paddingBottom: 40,
     paddingHorizontal: 40,
   },
 
@@ -149,19 +147,6 @@ const styles = StyleSheet.create({
   // ===== QR =====
   qrBlock: { alignItems: "center", marginTop: 20 },
   qrImage: { width: 85, height: 85 },
-
-  footer: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    paddingVertical: 14,
-    paddingHorizontal: 40,
-    borderTop: `1px solid ${BORDER_LIGHT}`,
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  footerText: { fontSize: 7.5, color: GRAY_LIGHT },
 });
 
 function money(value: number) {
@@ -255,9 +240,6 @@ function InvoiceDocument({ company, customer, invoice, items, balance }: Invoice
             View,
             { style: styles.invoiceMetaTable },
             InvoiceMetaRow("تاريخ الفاتورة", LtrSpan(invoice.invoice_date, styles.invoiceMetaValue)),
-            invoice.due_date && InvoiceMetaRow("تاريخ الاستحقاق", LtrSpan(invoice.due_date, styles.invoiceMetaValue)),
-            invoice.issued_at &&
-              InvoiceMetaRow("وقت الإصدار", LtrSpan(invoice.issued_at, { ...styles.invoiceMetaValue, fontSize: 7.5 })),
           ),
         ),
       ),
@@ -408,16 +390,6 @@ function InvoiceDocument({ company, customer, invoice, items, balance }: Invoice
           { style: styles.qrBlock },
           React.createElement(Image, { src: qrDataUrl, style: styles.qrImage }),
         ),
-
-      React.createElement(
-        View,
-        { style: styles.footer, fixed: true },
-        React.createElement(Text, { style: styles.footerText }, company.name),
-        React.createElement(
-          Text,
-          { style: styles.footerText, render: ({ pageNumber, totalPages }) => `صفحة ${pageNumber} من ${totalPages}` },
-        ),
-      ),
     ),
   );
 }

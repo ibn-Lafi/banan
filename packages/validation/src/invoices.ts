@@ -11,7 +11,6 @@ export type InvoiceItemInput = z.infer<typeof invoiceItemInputSchema>;
 export const createInvoiceDraftSchema = z.object({
   customer_id: z.string().uuid(),
   invoice_date: z.string().datetime().or(z.string().date()),
-  due_date: z.string().datetime().or(z.string().date()).optional().nullable(),
   items: z.array(invoiceItemInputSchema).min(1),
 });
 export type CreateInvoiceDraftInput = z.infer<typeof createInvoiceDraftSchema>;

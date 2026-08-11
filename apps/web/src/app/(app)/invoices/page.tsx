@@ -17,10 +17,8 @@ interface InvoiceListItem {
 const STATUS_LABELS: Record<string, string> = {
   draft: "مسودة",
   issued: "صادرة",
-  due: "آجلة",
   partially_paid: "مدفوعة جزئياً",
   paid: "مدفوعة",
-  overdue: "متأخرة",
   cancelled: "ملغاة",
 };
 

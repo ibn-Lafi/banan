@@ -42,6 +42,7 @@ pnpm dev:web   # http://localhost:3000
 2. من **SQL Editor**، شغّل الملفات بالترتيب:
    - `supabase/migrations/0001_init.sql`
    - `supabase/migrations/0002_storage.sql`
+   - `supabase/migrations/0003_remove_due_date.sql`
 3. من **Settings → API** انسخ:
    - `Project URL` → `SUPABASE_URL`
    - `anon public key` → `SUPABASE_ANON_KEY`
@@ -87,6 +88,10 @@ pnpm dev:web   # http://localhost:3000
   مُضمَّن (Arabic+Latin مدموجين لدعم التشكيل الصحيح) + QR بصيغة ZATCA Phase 1،
   يُحفظ في Supabase Storage (`invoice-pdfs`) ويُعاد توليده في كل طلب ليعكس
   آخر رصيد (مرتجعات/دفعات). زر "عرض/تحميل PDF" في صفحة تفاصيل الفاتورة.
+- ⚠️ **قرار منتج (يخالف SPEC.md §8/§11):** لا يوجد تاريخ استحقاق (`due_date`)
+  ولا حالتا `due`/`overdue` في هذا النظام — الفاتورة الآجلة تبقى `issued` أو
+  `partially_paid` إلى أن تُسدَّد بالكامل، بدون موعد نهائي. طُبِّق هذا عبر
+  `supabase/migrations/0003_remove_due_date.sql` وحذف الحقل من كل الطبقات.
 - ⏳ غير مُنفَّذ بعد: رفع شعار الشركة لـ Storage (منطق دمجه بالـ PDF جاهز إن
   توفر `logo_url`)، شاشة إنشاء مرتجع من واجهة الفاتورة، Offline handling،
   اختبارات API/E2E

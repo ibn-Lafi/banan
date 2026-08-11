@@ -19,7 +19,6 @@ interface InvoiceDetail {
   status: string;
   original_amount_gross: number;
   original_vat_amount: number;
-  due_date: string | null;
   customers: { name: string } | null;
   invoice_items: InvoiceItem[];
   balance: { current_amount_gross: number; outstanding_amount: number; total_payments: number; total_returns: number };

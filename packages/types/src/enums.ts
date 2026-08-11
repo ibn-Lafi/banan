@@ -29,13 +29,14 @@ export const InvoiceType = {
 } as const;
 export type InvoiceType = (typeof InvoiceType)[keyof typeof InvoiceType];
 
+// لا يوجد تاريخ استحقاق للفواتير الآجلة في هذا النظام — تبقى الفاتورة
+// "issued" (أو "partially_paid") إلى أن تُسدَّد بالكامل، بدون موعد نهائي
+// أو حالة "متأخرة"، حسب متى ما دفع العميل.
 export const InvoiceStatus = {
   DRAFT: "draft",
   ISSUED: "issued",
-  DUE: "due",
   PARTIALLY_PAID: "partially_paid",
   PAID: "paid",
-  OVERDUE: "overdue",
   CANCELLED: "cancelled",
 } as const;
 export type InvoiceStatus = (typeof InvoiceStatus)[keyof typeof InvoiceStatus];

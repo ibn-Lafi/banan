@@ -58,7 +58,6 @@ export async function createInvoiceDraft(input: CreateInvoiceDraftInput, ctx: Cr
       rep_id: ctx.repId,
       status: "draft",
       invoice_date: input.invoice_date,
-      due_date: input.due_date ?? null,
       original_amount_gross: totals.original_amount_gross,
       original_amount_net: totals.original_amount_net,
       original_vat_amount: totals.original_vat_amount,
@@ -134,7 +133,7 @@ export async function issueInvoice(invoiceId: string, ctx: IssueInvoiceContext) 
   const { data: updated, error: updateError } = await supabaseAdmin
     .from("invoices")
     .update({
-      status: invoice.due_date ? "due" : "issued",
+      status: "issued",
       invoice_type: invoiceType,
       invoice_number: invoiceNumber,
       qr_code_payload: qrPayload,

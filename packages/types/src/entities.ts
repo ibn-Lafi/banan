@@ -77,7 +77,6 @@ export interface Invoice {
   rep_id: string;
   status: InvoiceStatus;
   invoice_date: string;
-  due_date: string | null;
   original_amount_gross: number;
   original_amount_net: number;
   original_vat_amount: number;
@@ -188,7 +187,6 @@ export interface CustomerStatement {
   total_returns: number;
   total_payments: number;
   outstanding_amount: number;
-  overdue_amount: number;
   entries: CustomerLedgerEntry[];
 }
 

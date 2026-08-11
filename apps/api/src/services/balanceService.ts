@@ -60,24 +60,21 @@ export async function getInvoiceBalance(invoiceId: string) {
 export async function recomputeInvoiceStatus(invoiceId: string) {
   const { data: invoice, error } = await supabaseAdmin
     .from("invoices")
-    .select("id, status, current_amount_gross, due_date")
+    .select("id, status, current_amount_gross")
     .eq("id", invoiceId)
     .single();
   if (error || !invoice) throw ApiError.notFound("الفاتورة غير موجودة");
   if (invoice.status === "draft" || invoice.status === "cancelled") return invoice;
 
   const balance = await getInvoiceBalance(invoiceId);
-  const today = new Date().toISOString().slice(0, 10);
 
+  // لا يوجد تاريخ استحقاق أو حالة "متأخرة" — الفاتورة الآجلة تبقى "issued"
+  // أو "partially_paid" إلى أن تُسدَّد بالكامل، متى ما دفع العميل.
   let nextStatus: string;
   if (balance.outstanding_amount <= 0) {
     nextStatus = "paid";
   } else if (balance.total_payments > 0) {
     nextStatus = "partially_paid";
-  } else if (invoice.due_date && invoice.due_date < today) {
-    nextStatus = "overdue";
-  } else if (invoice.due_date) {
-    nextStatus = "due";
   } else {
     nextStatus = "issued";
   }

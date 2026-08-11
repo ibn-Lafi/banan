@@ -17,7 +17,6 @@ export function CreateInvoiceForm({ onCreated }: { onCreated?: () => void }) {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [customerId, setCustomerId] = useState("");
-  const [dueDate, setDueDate] = useState("");
   const [lines, setLines] = useState<DraftLine[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -60,7 +59,6 @@ export function CreateInvoiceForm({ onCreated }: { onCreated?: () => void }) {
         body: JSON.stringify({
           customer_id: customerId,
           invoice_date: new Date().toISOString().slice(0, 10),
-          due_date: dueDate || null,
           items: lines,
         }),
       });
@@ -144,11 +142,6 @@ export function CreateInvoiceForm({ onCreated }: { onCreated?: () => void }) {
           </div>
         ))}
         {lines.length === 0 && <p className="text-sm text-gray-400">لا توجد منتجات في الفاتورة بعد</p>}
-      </div>
-
-      <div>
-        <label className="mb-1 block text-sm font-medium text-gray-700">تاريخ الاستحقاق (آجلة، اختياري)</label>
-        <input type="date" className="input" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
       </div>
 
       <div className="rounded-lg bg-gray-100 px-4 py-3 text-lg font-bold">
