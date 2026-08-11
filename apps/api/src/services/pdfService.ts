@@ -74,9 +74,8 @@ const styles = StyleSheet.create({
   headerRule: { borderBottom: `2px solid ${INK}`, marginTop: 18, marginBottom: 16 },
 
   // ===== شريط رقم الفاتورة + الحالة =====
-  subHeaderRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 20 },
-  invoiceNumberLabel: { fontSize: 8.5, color: GRAY, marginBottom: 2 },
-  invoiceNumberValue: { fontSize: 13, fontWeight: "bold", color: INK },
+  subHeaderRow: { flexDirection: "row", justifyContent: "flex-start", alignItems: "center", marginBottom: 20 },
+  invoiceNumberValue: { fontSize: 16, fontWeight: "bold", color: INK, marginBottom: 10 },
   statusBadge: { borderRadius: 10, paddingVertical: 4, paddingHorizontal: 12 },
   statusBadgeText: { fontSize: 8.5, fontWeight: "bold" },
 
@@ -218,6 +217,7 @@ function InvoiceDocument({ company, customer, invoice, items, balance }: Invoice
           View,
           { style: styles.invoiceBlock },
           React.createElement(Text, { style: styles.invoiceTitle }, "فاتورة ضريبية"),
+          React.createElement(Text, { style: styles.invoiceNumberValue }, invoice.invoice_number ?? "—"),
           React.createElement(
             View,
             { style: styles.invoiceMetaTable },
@@ -228,16 +228,10 @@ function InvoiceDocument({ company, customer, invoice, items, balance }: Invoice
 
       React.createElement(View, { style: styles.headerRule }),
 
-      // ===== رقم الفاتورة + شارة الحالة =====
+      // ===== شارة الحالة =====
       React.createElement(
         View,
         { style: styles.subHeaderRow },
-        React.createElement(
-          View,
-          null,
-          React.createElement(Text, { style: styles.invoiceNumberLabel }, "رقم الفاتورة"),
-          React.createElement(Text, { style: styles.invoiceNumberValue }, invoice.invoice_number ?? "—"),
-        ),
         (() => {
           const statusMeta = STATUS_META[invoice.status] ?? { label: invoice.status, bg: "#f3f4f6", text: "#374151" };
           return React.createElement(
