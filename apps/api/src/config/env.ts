@@ -10,10 +10,22 @@ function required(name: string): string {
   return value;
 }
 
+// يقبل نسخ رابط Supabase كاملاً بالغلط (مثل ".../rest/v1/") ويبقي فقط أصل الرابط،
+// لأن مكتبة supabase-js تضيف /rest/v1 بنفسها — أي مسار زائد يكسر كل الاستعلامات
+// برسالة PGRST125 غامضة (Invalid path specified in request URL).
+function normalizeSupabaseUrl(name: string): string {
+  const raw = required(name);
+  try {
+    return new URL(raw).origin;
+  } catch {
+    throw new Error(`Invalid URL in environment variable ${name}: ${raw}`);
+  }
+}
+
 export const env = {
   nodeEnv: process.env.NODE_ENV ?? "development",
   port: Number(process.env.PORT ?? 4000),
-  supabaseUrl: required("SUPABASE_URL").replace(/\/$/, ""),
+  supabaseUrl: normalizeSupabaseUrl("SUPABASE_URL"),
   supabaseServiceRoleKey: required("SUPABASE_SERVICE_ROLE_KEY"),
   supabaseAnonKey: required("SUPABASE_ANON_KEY"),
   corsOrigin: (process.env.CORS_ORIGIN ?? "http://localhost:3000").trim().replace(/\/$/, ""),
