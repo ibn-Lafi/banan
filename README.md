@@ -56,7 +56,24 @@ pnpm dev:web   # http://localhost:3000
 
 ## إعداد Railway
 
-راجع القسم الخاص بالنشر في المحادثة — سيتم توثيقه هنا أيضاً بعد الربط الفعلي.
+المشروع Monorepo بخدمتين منفصلتين على نفس المستودع — `apps/api` و`apps/web`،
+كل واحدة لها `railway.json` بأوامر Build/Start الصحيحة (لا تحتاج لتعديلها،
+فقط أنشئ خدمتين من نفس الـ Repo واختر مجلد كل خدمة كـ Root Directory):
+
+**خدمة API** (`apps/api`):
+- Root Directory: `apps/api`
+- Build/Start Command: تُقرأ تلقائياً من `apps/api/railway.json`
+- متغيرات البيئة: نفس محتوى `apps/api/.env.example` (`SUPABASE_URL`,
+  `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `SETUP_TOKEN`,
+  `CORS_ORIGIN` = رابط خدمة الـ web بعد نشرها)
+
+**خدمة Web** (`apps/web`):
+- Root Directory: `apps/web`
+- Build/Start Command: تُقرأ تلقائياً من `apps/web/railway.json`
+- متغيرات البيئة: `NEXT_PUBLIC_API_URL` = رابط خدمة الـ API بعد نشرها
+  (⚠️ يجب ضبطها **قبل** أول Build لأن Next.js يُضمّنها وقت البناء، وليس وقت التشغيل)
+
+بعد نجاح النشر: افتح رابط خدمة الـ web على `/setup` لإتمام الإعداد الأولي.
 
 ## الحالة الحالية
 

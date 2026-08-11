@@ -1,0 +1,12 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "build": {
+    "builder": "NIXPACKS",
+    "buildCommand": "pnpm install --frozen-lockfile && pnpm --filter @banan/types --filter @banan/shared --filter @banan/validation --filter @banan/api build"
+  },
+  "deploy": {
+    "startCommand": "pnpm --filter @banan/api start",
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 3
+  }
+}
