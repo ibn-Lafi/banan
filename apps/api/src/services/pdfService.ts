@@ -112,11 +112,9 @@ const styles = StyleSheet.create({
   colNum: { flexGrow: 1, flexBasis: 0, textAlign: "center" },
 
   // ===== الإجماليات =====
-  totalsWrap: { flexDirection: "row", justifyContent: "space-between", marginTop: 20 },
-  notesBlock: { maxWidth: "48%", justifyContent: "flex-end" },
-  notesText: { fontSize: 7.5, color: GRAY_LIGHT, lineHeight: 1.6 },
+  totalsWrap: { marginTop: 20 },
 
-  totalsCard: { width: 230 },
+  totalsCard: { width: "100%" },
   totalsRow: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 5 },
   totalsRowBorder: {
     flexDirection: "row",
@@ -149,9 +147,8 @@ const styles = StyleSheet.create({
   outstandingValue: { fontSize: 13, fontWeight: "bold", color: INK },
 
   // ===== QR =====
-  qrBlock: { alignItems: "center", marginTop: 16 },
-  qrImage: { width: 70, height: 70, marginBottom: 4 },
-  qrCaption: { fontSize: 7, color: GRAY_LIGHT },
+  qrBlock: { alignItems: "center", marginTop: 24 },
+  qrImage: { width: 130, height: 130 },
 
   footer: {
     position: "absolute",
@@ -342,26 +339,10 @@ function InvoiceDocument({ company, customer, invoice, items, balance }: Invoice
         React.createElement(View, { style: { borderTop: `2px solid ${BORDER}` } }),
       ),
 
-      // ===== الإجماليات =====
+      // ===== الإجماليات (بنفس عرض جدول المنتجات) =====
       React.createElement(
         View,
         { style: styles.totalsWrap },
-        React.createElement(
-          View,
-          { style: styles.notesBlock },
-          React.createElement(
-            Text,
-            { style: styles.notesText },
-            "فاتورة متوافقة مع المرحلة الأولى (Phase 1) من نظام الفوترة الإلكترونية السعودي — ZATCA. تُصدَر هذه الوثيقة إلكترونياً ولا تتطلب توقيعاً أو ختماً.",
-          ),
-          qrDataUrl &&
-            React.createElement(
-              View,
-              { style: styles.qrBlock },
-              React.createElement(Image, { src: qrDataUrl, style: styles.qrImage }),
-              React.createElement(Text, { style: styles.qrCaption }, "رمز التحقق الإلكتروني"),
-            ),
-        ),
         React.createElement(
           View,
           { style: styles.totalsCard },
@@ -419,6 +400,14 @@ function InvoiceDocument({ company, customer, invoice, items, balance }: Invoice
             ),
         ),
       ),
+
+      // ===== رمز QR — في أسفل الفاتورة =====
+      qrDataUrl &&
+        React.createElement(
+          View,
+          { style: styles.qrBlock },
+          React.createElement(Image, { src: qrDataUrl, style: styles.qrImage }),
+        ),
 
       React.createElement(
         View,
