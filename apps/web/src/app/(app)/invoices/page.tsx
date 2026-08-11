@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { apiFetch } from "@/lib/apiClient";
+import { CreateInvoiceForm } from "@/components/CreateInvoiceForm";
 
 interface InvoiceListItem {
   id: string;
@@ -26,21 +27,33 @@ const STATUS_LABELS: Record<string, string> = {
 export default function InvoicesPage() {
   const [invoices, setInvoices] = useState<InvoiceListItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showCreate, setShowCreate] = useState(false);
 
-  useEffect(() => {
+  function load() {
     apiFetch<{ data: InvoiceListItem[] }>("/invoices")
       .then((res) => setInvoices(res.data))
       .finally(() => setLoading(false));
-  }, []);
+  }
+
+  useEffect(load, []);
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold">الفواتير</h1>
-        <Link href="/invoices/create" className="rounded-lg bg-brand-600 px-3 py-2 text-sm font-semibold text-white">
-          + فاتورة جديدة
-        </Link>
+        <button
+          onClick={() => setShowCreate((v) => !v)}
+          className="rounded-lg bg-brand-600 px-3 py-2 text-sm font-semibold text-white"
+        >
+          {showCreate ? "إخفاء النموذج" : "+ فاتورة جديدة"}
+        </button>
       </div>
+
+      {showCreate && (
+        <div className="rounded-xl border border-gray-200 bg-white p-4">
+          <CreateInvoiceForm />
+        </div>
+      )}
 
       {loading ? (
         <p className="py-8 text-center text-sm text-gray-400">جارٍ التحميل...</p>
