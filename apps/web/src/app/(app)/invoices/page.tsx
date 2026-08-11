@@ -31,12 +31,10 @@ const STATUS_META: Record<string, { label: string; className: string }> = {
 
 const FILTERS: { key: string; label: string }[] = [
   { key: "all", label: "الكل" },
-  { key: "draft", label: "مسودة" },
   { key: "issued", label: "جديدة" },
   { key: "partially_paid", label: "مدفوعة جزئياً" },
   { key: "returned", label: "مرتجع" },
   { key: "paid", label: "منتهية" },
-  { key: "cancelled", label: "ملغاة" },
 ];
 
 export default function InvoicesPage() {
