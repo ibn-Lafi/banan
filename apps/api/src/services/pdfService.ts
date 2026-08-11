@@ -65,8 +65,7 @@ const styles = StyleSheet.create({
   metaLine: { fontSize: 8.5, color: GRAY, marginBottom: 2, lineHeight: 1.5 },
 
   invoiceBlock: { alignItems: "flex-end" },
-  invoiceTitle: { fontSize: 20, fontWeight: "bold", color: INK, letterSpacing: 1, marginBottom: 3 },
-  invoiceTypeLabel: { fontSize: 8, color: GRAY, marginBottom: 10 },
+  invoiceTitle: { fontSize: 20, fontWeight: "bold", color: INK, letterSpacing: 1, marginBottom: 12 },
   invoiceMetaTable: { alignItems: "flex-end" },
   invoiceMetaRow: { flexDirection: "row", marginBottom: 3 },
   invoiceMetaLabel: { fontSize: 8.5, color: GRAY, marginLeft: 10 },
@@ -82,18 +81,6 @@ const styles = StyleSheet.create({
   statusBadgeText: { fontSize: 8.5, fontWeight: "bold" },
 
   // ===== بيانات العميل =====
-  billToLabel: {
-    fontSize: 8.5,
-    fontWeight: "bold",
-    color: NEUTRAL_TEXT,
-    backgroundColor: NEUTRAL_FILL,
-    alignSelf: "flex-start",
-    paddingVertical: 3,
-    paddingHorizontal: 9,
-    borderRadius: 3,
-    marginBottom: 8,
-    letterSpacing: 0.5,
-  },
   customerBlock: { borderTop: `1px solid ${BORDER_LIGHT}`, borderBottom: `1px solid ${BORDER_LIGHT}`, paddingVertical: 10, marginBottom: 22 },
   customerName: { fontSize: 11.5, fontWeight: "bold", color: INK, marginBottom: 3 },
   customerLine: { fontSize: 8.5, color: GRAY, marginBottom: 1.5 },
@@ -232,11 +219,6 @@ function InvoiceDocument({ company, customer, invoice, items, balance }: Invoice
           { style: styles.invoiceBlock },
           React.createElement(Text, { style: styles.invoiceTitle }, "فاتورة ضريبية"),
           React.createElement(
-            Text,
-            { style: styles.invoiceTypeLabel },
-            invoice.invoice_type === "simplified" ? "TAX INVOICE (SIMPLIFIED)" : "TAX INVOICE (STANDARD)",
-          ),
-          React.createElement(
             View,
             { style: styles.invoiceMetaTable },
             InvoiceMetaRow("تاريخ الفاتورة", LtrSpan(invoice.invoice_date, styles.invoiceMetaValue)),
@@ -267,7 +249,6 @@ function InvoiceDocument({ company, customer, invoice, items, balance }: Invoice
       ),
 
       // ===== بيانات العميل =====
-      React.createElement(Text, { style: styles.billToLabel }, "فوترة إلى / BILL TO"),
       React.createElement(
         View,
         { style: styles.customerBlock },
