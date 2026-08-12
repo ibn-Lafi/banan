@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { apiFetch, ApiRequestError } from "@/lib/apiClient";
 import type { Category, Product, Unit } from "@banan/types";
+import { BoxIcon } from "@/components/icons";
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -312,20 +313,23 @@ export default function ProductsPage() {
       ) : filtered.length === 0 ? (
         <p className="py-8 text-center text-sm text-gray-400">لا توجد منتجات</p>
       ) : (
-        <ul className="divide-y divide-gray-100 overflow-hidden rounded-xl border border-gray-200 bg-white">
+        <div className="grid grid-cols-2 gap-3">
           {filtered.map((p) => {
             const meta = [p.sku, categoryName(p.category_id), unitName(p.unit_id)].filter(Boolean).join("  •  ");
             return (
-              <li key={p.id} className="flex items-center justify-between px-4 py-3">
-                <div>
-                  <p className="font-medium">{p.name}</p>
-                  {meta && <p className="text-xs text-gray-500">{meta}</p>}
+              <div key={p.id} className="overflow-hidden rounded-2xl border border-gray-200 bg-white">
+                <div className="flex aspect-square items-center justify-center bg-gray-50">
+                  <BoxIcon className="h-10 w-10 text-gray-300" />
                 </div>
-                <p className="font-semibold">{p.price_gross} ر.س</p>
-              </li>
+                <div className="p-3">
+                  <p className="line-clamp-2 text-sm font-medium">{p.name}</p>
+                  {meta && <p className="mt-0.5 truncate text-xs text-gray-500">{meta}</p>}
+                  <p className="mt-2 font-bold">{p.price_gross} ر.س</p>
+                </div>
+              </div>
             );
           })}
-        </ul>
+        </div>
       )}
     </div>
   );

@@ -10,25 +10,27 @@ export function BottomNav() {
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-20 flex border-t border-gray-200 bg-white/95 pb-[var(--safe-bottom)] shadow-[0_-1px_6px_rgba(0,0,0,0.04)] backdrop-blur md:hidden"
+      className="fixed inset-x-0 bottom-0 z-20 px-3 pb-[calc(var(--safe-bottom)+0.5rem)] pt-2 md:hidden"
       aria-label="التنقل الرئيسي"
     >
-      {navItems.map((item) => {
-        const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
-        const Icon = item.icon;
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={`flex flex-1 flex-col items-center gap-1 py-2.5 text-[11px] font-medium transition-colors ${
-              active ? "text-brand-600" : "text-gray-400"
-            }`}
-          >
-            <Icon className={`h-6 w-6 ${active ? "text-brand-600" : "text-gray-400"}`} />
-            <span>{item.label}</span>
-          </Link>
-        );
-      })}
+      <div className="mx-auto flex max-w-md items-center justify-between rounded-full border border-gray-200 bg-white/95 p-1.5 shadow-lg backdrop-blur">
+        {navItems.map((item) => {
+          const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
+          const Icon = item.icon;
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`flex flex-1 flex-col items-center gap-0.5 rounded-full py-2 text-[11px] font-medium transition-colors ${
+                active ? "bg-gray-100 text-gray-900" : "text-gray-400"
+              }`}
+            >
+              <Icon className={`h-5 w-5 ${active ? "text-gray-900" : "text-gray-400"}`} />
+              <span>{item.label}</span>
+            </Link>
+          );
+        })}
+      </div>
     </nav>
   );
 }

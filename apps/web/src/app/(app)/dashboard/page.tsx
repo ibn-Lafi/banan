@@ -24,18 +24,20 @@ export default function DashboardPage() {
   }, []);
 
   return (
-    <div className="space-y-6">
-      <div>
+    <div className="space-y-4">
+      <div className="-mx-4 -mt-4 rounded-b-[2rem] bg-gray-900 px-4 pb-10 pt-6 text-white">
         <h1 className="text-xl font-bold">مرحباً {session?.user.full_name ?? ""}</h1>
-        <p className="text-sm text-gray-500">نظرة سريعة على أدائك</p>
+        <p className="text-sm text-gray-400">نظرة سريعة على أدائك</p>
       </div>
 
-      <Link
-        href="/invoices"
-        className="block rounded-xl bg-brand-600 px-4 py-3 text-center font-semibold text-white shadow-sm"
-      >
-        + إنشاء فاتورة جديدة
-      </Link>
+      <div className="-mt-8">
+        <Link
+          href="/invoices"
+          className="block rounded-2xl bg-white px-4 py-4 text-center font-semibold text-gray-900 shadow-lg ring-1 ring-black/5"
+        >
+          + إنشاء فاتورة جديدة
+        </Link>
+      </div>
 
       <div className="grid grid-cols-2 gap-3">
         <StatCard label="عدد الفواتير" value={summary?.invoices_count ?? "—"} />
