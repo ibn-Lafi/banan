@@ -135,7 +135,7 @@ export function QuickReturnModal({ onClose }: { onClose: () => void }) {
             <p className="mb-2 text-sm font-medium text-gray-700">حدد كمية المرتجع من بنود الفاتورة</p>
             <div className="space-y-2">
               {returnableItems.map((item) => (
-                <div key={item.id} className="rounded-xl border border-gray-200 p-3">
+                <div key={item.id} className="rounded-2xl border border-gray-200 p-3">
                   <div className="mb-2 flex items-center justify-between">
                     <p className="text-sm font-medium">{item.product_name_snapshot}</p>
                     <p className="text-xs text-gray-500">
@@ -166,7 +166,7 @@ export function QuickReturnModal({ onClose }: { onClose: () => void }) {
         <button
           type="submit"
           disabled={saving || !invoiceId}
-          className="w-full rounded-lg bg-brand-600 py-2.5 font-semibold text-white disabled:opacity-60"
+          className="pill-btn bg-gray-900 text-white disabled:bg-gray-300 disabled:text-gray-500"
         >
           {saving ? "جارٍ الحفظ..." : "تسجيل المرتجع"}
         </button>

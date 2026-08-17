@@ -153,7 +153,7 @@ export function QuickPaymentModal({ onClose }: { onClose: () => void }) {
         <button
           type="submit"
           disabled={saving || !invoiceId}
-          className="w-full rounded-lg bg-brand-600 py-2.5 font-semibold text-white disabled:opacity-60"
+          className="pill-btn bg-gray-900 text-white disabled:bg-gray-300 disabled:text-gray-500"
         >
           {saving ? "جارٍ الحفظ..." : "تسجيل التحصيل"}
         </button>

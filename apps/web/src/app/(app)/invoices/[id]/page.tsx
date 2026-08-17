@@ -23,6 +23,7 @@ interface InvoiceDetail {
   original_vat_amount: number;
   customers: { name: string } | null;
   invoice_items: InvoiceItem[];
+  notes: string | null;
   balance: { current_amount_gross: number; outstanding_amount: number; total_payments: number; total_returns: number };
 }
 
@@ -286,6 +287,13 @@ export default function InvoiceDetailsPage() {
           />
         </div>
       </div>
+
+      {invoice.notes && (
+        <div className="rounded-xl border border-gray-200 bg-white p-4">
+          <p className="mb-1 text-sm font-semibold text-gray-700">ملاحظات الفاتورة</p>
+          <p className="whitespace-pre-line text-sm text-gray-600">{invoice.notes}</p>
+        </div>
+      )}
 
       {error && <p className="text-sm text-red-600">{error}</p>}
 

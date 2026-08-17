@@ -13,6 +13,12 @@ export const createInvoiceDraftSchema = z.object({
   customer_id: z.string().uuid(),
   invoice_date: z.string().datetime().or(z.string().date()),
   items: z.array(invoiceItemInputSchema).min(1),
+  notes: z
+    .string()
+    .max(2000)
+    .optional()
+    .nullable()
+    .transform((v) => (v && v.trim() ? v.trim() : null)),
 });
 export type CreateInvoiceDraftInput = z.infer<typeof createInvoiceDraftSchema>;
 

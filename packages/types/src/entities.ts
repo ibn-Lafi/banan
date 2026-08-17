@@ -109,6 +109,7 @@ export interface Invoice {
   original_vat_amount: number;
   current_amount_gross: number;
   qr_code_payload: string | null;
+  notes: string | null;
   issued_at: string | null;
   cancelled_at: string | null;
   created_at: string;
