@@ -7,6 +7,7 @@ import type { Customer, Product, Unit } from "@banan/types";
 
 interface DraftLine {
   product_id: string;
+  variant_id: string | null;
   quantity: number;
   unit_price: number;
 }
@@ -33,9 +34,15 @@ export function CreateInvoiceForm({ onCreated }: { onCreated?: () => void }) {
   function addLine() {
     if (products.length === 0) return;
     const firstProduct = products[0];
+    const firstVariant = firstProduct.product_variants?.[0] ?? null;
     setLines((prev) => [
       ...prev,
-      { product_id: firstProduct.id, quantity: 1, unit_price: Number(firstProduct.price_gross) },
+      {
+        product_id: firstProduct.id,
+        variant_id: firstVariant?.id ?? null,
+        quantity: 1,
+        unit_price: Number(firstVariant?.price_gross ?? firstProduct.price_gross),
+      },
     ]);
   }
 
@@ -114,16 +121,19 @@ export function CreateInvoiceForm({ onCreated }: { onCreated?: () => void }) {
                   value={line.product_id}
                   onChange={(e) => {
                     const product = products.find((p) => p.id === e.target.value);
+                    const firstVariant = product?.product_variants?.[0] ?? null;
                     updateLine(index, {
                       product_id: e.target.value,
-                      unit_price: product ? Number(product.price_gross) : line.unit_price,
+                      variant_id: firstVariant?.id ?? null,
+                      unit_price: Number(firstVariant?.price_gross ?? product?.price_gross ?? line.unit_price),
                     });
                   }}
                 >
                   {products.map((p) => (
                     <option key={p.id} value={p.id}>
                       {p.name}
-                      {unitName(p.unit_id) ? ` (${unitName(p.unit_id)})` : ""} — {p.price_gross} ر.س
+                      {unitName(p.unit_id) ? ` (${unitName(p.unit_id)})` : ""}
+                      {!p.product_variants?.length ? ` — ${p.price_gross} ر.س` : ""}
                     </option>
                   ))}
                 </select>
@@ -136,6 +146,32 @@ export function CreateInvoiceForm({ onCreated }: { onCreated?: () => void }) {
                   حذف
                 </button>
               </div>
+              {(() => {
+                const selectedVariants = selectedProduct?.product_variants ?? [];
+                if (selectedVariants.length === 0) return null;
+                return (
+                  <div>
+                    <label className="mb-1 block text-xs text-gray-500">الحجم</label>
+                    <select
+                      className="input"
+                      value={line.variant_id ?? ""}
+                      onChange={(e) => {
+                        const variant = selectedVariants.find((v) => v.id === e.target.value);
+                        updateLine(index, {
+                          variant_id: e.target.value || null,
+                          unit_price: variant ? Number(variant.price_gross) : line.unit_price,
+                        });
+                      }}
+                    >
+                      {selectedVariants.map((v) => (
+                        <option key={v.id} value={v.id}>
+                          {v.name} — {v.price_gross} ر.س
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                );
+              })()}
               <div className="flex items-center gap-2">
                 <div className="flex-1">
                   <label className="mb-1 block text-xs text-gray-500">

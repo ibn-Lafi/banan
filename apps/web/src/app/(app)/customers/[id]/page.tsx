@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/apiClient";
-import type { Customer, CustomerStatement } from "@banan/types";
+import type { City, Customer, CustomerStatement } from "@banan/types";
+import { LocationIcon } from "@/components/icons";
 
 const ENTRY_META: Record<string, { label: string; className: string }> = {
   invoice: { label: "فاتورة", className: "bg-blue-50 text-blue-700" },
@@ -16,11 +17,18 @@ export default function CustomerDetailsPage() {
   const router = useRouter();
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [statement, setStatement] = useState<CustomerStatement | null>(null);
+  const [cities, setCities] = useState<City[]>([]);
 
   useEffect(() => {
     apiFetch<{ data: Customer }>(`/customers/${id}`).then((res) => setCustomer(res.data));
     apiFetch<{ data: CustomerStatement }>(`/customers/${id}/statement`).then((res) => setStatement(res.data));
   }, [id]);
+
+  useEffect(() => {
+    apiFetch<{ data: City[] }>("/cities").then((res) => setCities(res.data));
+  }, []);
+
+  const cityName = cities.find((c) => c.id === customer?.city_id)?.name;
 
   if (!customer) return <p className="py-8 text-center text-sm text-gray-400">جارٍ التحميل...</p>;
 
@@ -41,8 +49,23 @@ export default function CustomerDetailsPage() {
 
       <div>
         <h1 className="text-xl font-bold">{customer.name}</h1>
-        <p className="text-sm text-gray-500">{customer.phone ?? "بدون رقم جوال"}</p>
+        <p className="text-sm text-gray-500">
+          {customer.phone ?? "بدون رقم جوال"}
+          {cityName ? `  •  ${cityName}` : ""}
+        </p>
       </div>
+
+      {customer.maps_url && (
+        <a
+          href={customer.maps_url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white py-2.5 text-sm font-semibold text-gray-700"
+        >
+          <LocationIcon className="h-4 w-4" />
+          فتح موقع العميل
+        </a>
+      )}
 
       {statement && (
         <>

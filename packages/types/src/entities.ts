@@ -40,6 +40,8 @@ export interface Customer {
   phone: string | null;
   email: string | null;
   address: string | null;
+  city_id: string | null;
+  maps_url: string | null;
   notes: string | null;
   status: CustomerStatus;
   created_by: string;
@@ -61,6 +63,21 @@ export interface Unit {
   created_at: string;
 }
 
+export interface City {
+  id: string;
+  company_id: string;
+  name: string;
+  created_at: string;
+}
+
+export interface ProductVariant {
+  id: string;
+  product_id: string;
+  name: string;
+  price_gross: number;
+  created_at: string;
+}
+
 export interface Product {
   id: string;
   company_id: string;
@@ -74,6 +91,8 @@ export interface Product {
   created_by: string;
   created_at: string;
   updated_at: string;
+  /** تُضمَّن فقط عند الجلب مع العلاقة (GET /products) */
+  product_variants?: ProductVariant[];
 }
 
 export interface Invoice {
@@ -102,6 +121,8 @@ export interface InvoiceItem {
   product_id: string;
   product_name_snapshot: string;
   unit_name_snapshot: string | null;
+  variant_id: string | null;
+  variant_name_snapshot: string | null;
   quantity: number;
   product_base_price: number;
   unit_price: number;

@@ -21,6 +21,7 @@ export default function ProductsPage() {
     category_id: "",
     unit_id: "",
   });
+  const [variants, setVariants] = useState<{ name: string; price_gross: string }[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -68,9 +69,13 @@ export default function ProductsPage() {
           vat_rate: Number(form.vat_rate),
           category_id: form.category_id || null,
           unit_id: form.unit_id || null,
+          variants: variants
+            .filter((v) => v.name.trim() && v.price_gross)
+            .map((v) => ({ name: v.name.trim(), price_gross: Number(v.price_gross) })),
         }),
       });
       setForm({ name: "", sku: "", price_gross: "", vat_rate: "0.15", category_id: "", unit_id: "" });
+      setVariants([]);
       setShowCreate(false);
       loadProducts();
     } catch (err) {
@@ -78,6 +83,18 @@ export default function ProductsPage() {
     } finally {
       setSaving(false);
     }
+  }
+
+  function addVariant() {
+    setVariants((prev) => [...prev, { name: "", price_gross: "" }]);
+  }
+
+  function updateVariant(index: number, patch: Partial<{ name: string; price_gross: string }>) {
+    setVariants((prev) => prev.map((v, i) => (i === index ? { ...v, ...patch } : v)));
+  }
+
+  function removeVariant(index: number) {
+    setVariants((prev) => prev.filter((_, i) => i !== index));
   }
 
   async function handleAddCategory(e: React.FormEvent) {
@@ -204,6 +221,49 @@ export default function ProductsPage() {
               />
             </div>
           </div>
+
+          <div>
+            <div className="mb-2 flex items-center justify-between">
+              <label className="text-xs font-semibold text-gray-500">
+                أحجام/مقاسات المنتج (اختياري — مثال: صغير، وسط، كبير)
+              </label>
+              <button type="button" onClick={addVariant} className="text-xs font-semibold text-brand-600">
+                + إضافة حجم
+              </button>
+            </div>
+            {variants.length > 0 && (
+              <div className="space-y-2">
+                {variants.map((v, index) => (
+                  <div key={index} className="flex gap-2">
+                    <input
+                      className="input flex-1"
+                      placeholder="اسم الحجم (مثال: كبير)"
+                      value={v.name}
+                      onChange={(e) => updateVariant(index, { name: e.target.value })}
+                    />
+                    <input
+                      type="number"
+                      step="0.01"
+                      min={0.01}
+                      className="input w-28"
+                      placeholder="السعر"
+                      value={v.price_gross}
+                      onChange={(e) => updateVariant(index, { price_gross: e.target.value })}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeVariant(index)}
+                      aria-label="حذف الحجم"
+                      className="rounded-lg border border-red-200 px-3 text-red-600"
+                    >
+                      حذف
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
           {error && <p className="text-sm text-red-600">{error}</p>}
           <button
             type="submit"
@@ -316,6 +376,7 @@ export default function ProductsPage() {
         <div className="grid grid-cols-2 gap-3">
           {filtered.map((p) => {
             const meta = [p.sku, categoryName(p.category_id), unitName(p.unit_id)].filter(Boolean).join("  •  ");
+            const productVariants = p.product_variants ?? [];
             return (
               <div key={p.id} className="overflow-hidden rounded-2xl border border-gray-200 bg-white">
                 <div className="flex aspect-square items-center justify-center bg-gray-50">
@@ -324,7 +385,13 @@ export default function ProductsPage() {
                 <div className="p-3">
                   <p className="line-clamp-2 text-sm font-medium">{p.name}</p>
                   {meta && <p className="mt-0.5 truncate text-xs text-gray-500">{meta}</p>}
-                  <p className="mt-2 font-bold">{p.price_gross} ر.س</p>
+                  {productVariants.length > 0 ? (
+                    <p className="mt-2 truncate text-xs text-gray-500">
+                      {productVariants.map((v) => `${v.name} ${v.price_gross}`).join("  •  ")}
+                    </p>
+                  ) : (
+                    <p className="mt-2 font-bold">{p.price_gross} ر.س</p>
+                  )}
                 </div>
               </div>
             );

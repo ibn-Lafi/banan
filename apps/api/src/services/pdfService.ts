@@ -41,10 +41,10 @@ const HEADER_FILL = NEUTRAL_FILL;
 
 const STATUS_META: Record<string, { label: string; bg: string; text: string }> = {
   draft: { label: "مسودة", bg: NEUTRAL_FILL, text: NEUTRAL_TEXT },
-  issued: { label: "جديدة", bg: NEUTRAL_FILL, text: NEUTRAL_TEXT },
+  issued: { label: "أجل", bg: NEUTRAL_FILL, text: NEUTRAL_TEXT },
   partially_paid: { label: "مدفوعة جزئياً", bg: NEUTRAL_FILL, text: NEUTRAL_TEXT },
-  returned: { label: "مرتجع", bg: NEUTRAL_FILL, text: NEUTRAL_TEXT },
-  paid: { label: "منتهية", bg: NEUTRAL_FILL, text: NEUTRAL_TEXT },
+  returned: { label: "مرتجع أو تالف", bg: NEUTRAL_FILL, text: NEUTRAL_TEXT },
+  paid: { label: "مدفوع", bg: NEUTRAL_FILL, text: NEUTRAL_TEXT },
   cancelled: { label: "ملغاة", bg: NEUTRAL_FILL, text: NEUTRAL_TEXT },
 };
 
@@ -327,7 +327,7 @@ function InvoiceDocument(
             React.createElement(
               Text,
               { style: [styles.td, styles.colProduct] },
-              item.product_name_snapshot,
+              item.variant_name_snapshot ? `${item.product_name_snapshot} (${item.variant_name_snapshot})` : item.product_name_snapshot,
               stage !== "original" && item.returned_quantity > 0
                 ? React.createElement(Text, { style: styles.tdMuted }, `  (مرتجع: ${item.returned_quantity})`)
                 : null,

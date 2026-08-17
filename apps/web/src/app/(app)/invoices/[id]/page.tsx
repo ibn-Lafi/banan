@@ -8,6 +8,7 @@ interface InvoiceItem {
   id: string;
   product_name_snapshot: string;
   unit_name_snapshot: string | null;
+  variant_name_snapshot: string | null;
   quantity: number;
   unit_price: number;
   line_gross: number;
@@ -27,10 +28,10 @@ interface InvoiceDetail {
 
 const STATUS_META: Record<string, { label: string; className: string }> = {
   draft: { label: "مسودة", className: "bg-gray-100 text-gray-600" },
-  issued: { label: "جديدة", className: "bg-blue-50 text-blue-700" },
+  issued: { label: "أجل", className: "bg-blue-50 text-blue-700" },
   partially_paid: { label: "مدفوعة جزئياً", className: "bg-amber-50 text-amber-700" },
-  returned: { label: "مرتجع", className: "bg-purple-50 text-purple-700" },
-  paid: { label: "منتهية", className: "bg-green-50 text-green-700" },
+  returned: { label: "مرتجع أو تالف", className: "bg-purple-50 text-purple-700" },
+  paid: { label: "مدفوع", className: "bg-green-50 text-green-700" },
   cancelled: { label: "ملغاة", className: "bg-red-50 text-red-700" },
 };
 
@@ -255,7 +256,10 @@ export default function InvoiceDetailsPage() {
           {invoice.invoice_items.map((item) => (
             <li key={item.id} className="flex items-center justify-between px-4 py-3">
               <div>
-                <p className="text-sm font-medium">{item.product_name_snapshot}</p>
+                <p className="text-sm font-medium">
+                  {item.product_name_snapshot}
+                  {item.variant_name_snapshot ? ` (${item.variant_name_snapshot})` : ""}
+                </p>
                 <p className="text-xs text-gray-500">
                   {item.quantity} {item.unit_name_snapshot ?? ""} × {item.unit_price} ر.س
                   {item.returned_quantity > 0 && ` — مرتجع: ${item.returned_quantity}`}
@@ -384,7 +388,10 @@ export default function InvoiceDetailsPage() {
               {returnableItems.map((item) => (
                 <div key={item.id} className="flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-sm font-medium">{item.product_name_snapshot}</p>
+                    <p className="text-sm font-medium">
+                      {item.product_name_snapshot}
+                      {item.variant_name_snapshot ? ` (${item.variant_name_snapshot})` : ""}
+                    </p>
                     <p className="text-xs text-gray-500">
                       القابل للإرجاع: {item.remaining} {item.unit_name_snapshot ?? ""}
                     </p>

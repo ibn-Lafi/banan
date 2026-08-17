@@ -15,7 +15,7 @@ export async function createInvoiceDraft(input: CreateInvoiceDraftInput, ctx: Cr
   const productIds = input.items.map((item) => item.product_id);
   const { data: products, error: productsError } = await supabaseAdmin
     .from("products")
-    .select("id, name, price_gross, vat_rate, status, units(name)")
+    .select("id, name, price_gross, vat_rate, status, units(name), product_variants(id, name)")
     .eq("company_id", ctx.companyId)
     .in("id", productIds);
 
@@ -38,10 +38,17 @@ export async function createInvoiceDraft(input: CreateInvoiceDraftInput, ctx: Cr
       vatRate: Number(product.vat_rate),
     });
     const unit = product.units as unknown as { name: string } | null;
+    const variants = (product.product_variants ?? []) as unknown as { id: string; name: string }[];
+    const variant = item.variant_id ? variants.find((v) => v.id === item.variant_id) : null;
+    if (item.variant_id && !variant) {
+      throw ApiError.badRequest(`الحجم المحدد غير موجود للمنتج "${product.name}"`);
+    }
     return {
       product_id: product.id,
       product_name_snapshot: product.name,
       unit_name_snapshot: unit?.name ?? null,
+      variant_id: item.variant_id ?? null,
+      variant_name_snapshot: variant?.name ?? null,
       quantity: item.quantity,
       product_base_price: Number(product.price_gross),
       unit_price: item.unit_price,

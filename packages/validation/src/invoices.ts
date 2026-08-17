@@ -2,6 +2,7 @@ import { z } from "zod";
 
 export const invoiceItemInputSchema = z.object({
   product_id: z.string().uuid(),
+  variant_id: z.string().uuid().optional().nullable(),
   quantity: z.number().positive(),
   // القسم 7: المندوب يستطيع تعديل unit_price بحرية، لا حد أدنى في MVP
   unit_price: z.number().positive(),

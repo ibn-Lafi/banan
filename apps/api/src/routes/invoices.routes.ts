@@ -111,11 +111,14 @@ invoicesRouter.patch(
         invoice_date: input.invoice_date ?? invoice.invoice_date,
         items:
           input.items ??
-          invoice.invoice_items.map((it: { product_id: string; quantity: number; unit_price: number }) => ({
-            product_id: it.product_id,
-            quantity: it.quantity,
-            unit_price: it.unit_price,
-          })),
+          invoice.invoice_items.map(
+            (it: { product_id: string; variant_id: string | null; quantity: number; unit_price: number }) => ({
+              product_id: it.product_id,
+              variant_id: it.variant_id,
+              quantity: it.quantity,
+              unit_price: it.unit_price,
+            }),
+          ),
       },
       { companyId: req.user!.company_id, repId: req.user!.id },
     );

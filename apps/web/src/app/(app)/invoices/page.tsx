@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { apiFetch } from "@/lib/apiClient";
 import { CreateInvoiceForm } from "@/components/CreateInvoiceForm";
 
@@ -22,26 +23,27 @@ interface CustomerOption {
 
 const STATUS_META: Record<string, { label: string; className: string }> = {
   draft: { label: "مسودة", className: "bg-gray-100 text-gray-600" },
-  issued: { label: "جديدة", className: "bg-blue-50 text-blue-700" },
+  issued: { label: "أجل", className: "bg-blue-50 text-blue-700" },
   partially_paid: { label: "مدفوعة جزئياً", className: "bg-amber-50 text-amber-700" },
-  returned: { label: "مرتجع", className: "bg-purple-50 text-purple-700" },
-  paid: { label: "منتهية", className: "bg-green-50 text-green-700" },
+  returned: { label: "مرتجع أو تالف", className: "bg-purple-50 text-purple-700" },
+  paid: { label: "مدفوع", className: "bg-green-50 text-green-700" },
   cancelled: { label: "ملغاة", className: "bg-red-50 text-red-700" },
 };
 
 const FILTERS: { key: string; label: string }[] = [
   { key: "all", label: "الكل" },
-  { key: "issued", label: "جديدة" },
+  { key: "issued", label: "أجل" },
   { key: "partially_paid", label: "مدفوعة جزئياً" },
-  { key: "returned", label: "مرتجع" },
-  { key: "paid", label: "منتهية" },
+  { key: "returned", label: "مرتجع أو تالف" },
+  { key: "paid", label: "مدفوع" },
 ];
 
 export default function InvoicesPage() {
+  const searchParams = useSearchParams();
   const [invoices, setInvoices] = useState<InvoiceListItem[]>([]);
   const [customers, setCustomers] = useState<CustomerOption[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showCreate, setShowCreate] = useState(false);
+  const [showCreate, setShowCreate] = useState(() => searchParams.get("create") === "1");
   const [statusFilter, setStatusFilter] = useState("all");
   const [customerFilter, setCustomerFilter] = useState("all");
   const [fromDate, setFromDate] = useState("");

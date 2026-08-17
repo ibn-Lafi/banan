@@ -1,5 +1,11 @@
 import { Router } from "express";
-import { createCategorySchema, createProductSchema, createUnitSchema, updateProductSchema } from "@banan/validation";
+import {
+  createCategorySchema,
+  createProductSchema,
+  createUnitSchema,
+  productVariantInputSchema,
+  updateProductSchema,
+} from "@banan/validation";
 import { asyncHandler } from "../middleware/asyncHandler.js";
 import { requireAuth } from "../middleware/auth.js";
 import { supabaseAdmin } from "../lib/supabase.js";
@@ -15,7 +21,7 @@ productsRouter.get(
     const search = typeof req.query.search === "string" ? req.query.search.trim() : "";
     let query = supabaseAdmin
       .from("products")
-      .select("*")
+      .select("*, product_variants(*)")
       .eq("company_id", req.user!.company_id)
       .order("created_at", { ascending: false });
 
@@ -34,7 +40,7 @@ productsRouter.get(
   asyncHandler(async (req, res) => {
     const { data, error } = await supabaseAdmin
       .from("products")
-      .select("*")
+      .select("*, product_variants(*)")
       .eq("id", req.params.id)
       .eq("company_id", req.user!.company_id)
       .maybeSingle();
@@ -48,7 +54,7 @@ productsRouter.get(
 productsRouter.post(
   "/",
   asyncHandler(async (req, res) => {
-    const input = createProductSchema.parse(req.body);
+    const { variants, ...input } = createProductSchema.parse(req.body);
     const { data, error } = await supabaseAdmin
       .from("products")
       .insert({ ...input, company_id: req.user!.company_id, created_by: req.user!.id })
@@ -57,6 +63,16 @@ productsRouter.post(
     if (error) {
       if (error.code === "23505") throw ApiError.conflict("رمز SKU مستخدم بالفعل");
       throw error;
+    }
+
+    let createdVariants: unknown[] = [];
+    if (variants && variants.length > 0) {
+      const { data: variantRows, error: variantsError } = await supabaseAdmin
+        .from("product_variants")
+        .insert(variants.map((v) => ({ ...v, product_id: data.id })))
+        .select();
+      if (variantsError) throw variantsError;
+      createdVariants = variantRows ?? [];
     }
 
     await writeAuditLog({
@@ -68,6 +84,29 @@ productsRouter.post(
       newValue: data,
     });
 
+    res.status(201).json({ data: { ...data, product_variants: createdVariants } });
+  }),
+);
+
+// إضافة حجم/مقاس جديد لمنتج موجود (بدون التأثير على الأحجام الأخرى)
+productsRouter.post(
+  "/:id/variants",
+  asyncHandler(async (req, res) => {
+    const input = productVariantInputSchema.parse(req.body);
+    const { data: product } = await supabaseAdmin
+      .from("products")
+      .select("id")
+      .eq("id", req.params.id)
+      .eq("company_id", req.user!.company_id)
+      .maybeSingle();
+    if (!product) throw ApiError.notFound("المنتج غير موجود");
+
+    const { data, error } = await supabaseAdmin
+      .from("product_variants")
+      .insert({ ...input, product_id: product.id })
+      .select()
+      .single();
+    if (error) throw error;
     res.status(201).json({ data });
   }),
 );

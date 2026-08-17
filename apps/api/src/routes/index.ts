@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { setupRouter } from "./setup.routes.js";
 import { authRouter } from "./auth.routes.js";
-import { customersRouter } from "./customers.routes.js";
+import { citiesRouter, customersRouter } from "./customers.routes.js";
 import { categoriesRouter, productsRouter, unitsRouter } from "./products.routes.js";
 import { invoicesRouter } from "./invoices.routes.js";
 import { paymentsRouter } from "./payments.routes.js";
@@ -16,6 +16,7 @@ export const apiRouter = Router();
 apiRouter.use("/setup", setupRouter);
 apiRouter.use("/auth", authRouter);
 apiRouter.use("/customers", customersRouter);
+apiRouter.use("/cities", citiesRouter);
 apiRouter.use("/products", productsRouter);
 apiRouter.use("/categories", categoriesRouter);
 apiRouter.use("/units", unitsRouter);

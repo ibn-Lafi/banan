@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createCustomerSchema, updateCustomerSchema } from "@banan/validation";
+import { createCitySchema, createCustomerSchema, updateCustomerSchema } from "@banan/validation";
 import { asyncHandler } from "../middleware/asyncHandler.js";
 import { requireAuth } from "../middleware/auth.js";
 import { supabaseAdmin } from "../lib/supabase.js";
@@ -25,6 +25,9 @@ customersRouter.get(
       query = query.or(
         `name.ilike.%${search}%,phone.ilike.%${search}%,vat_number.ilike.%${search}%,cr_number.ilike.%${search}%`,
       );
+    }
+    if (typeof req.query.city_id === "string") {
+      query = query.eq("city_id", req.query.city_id);
     }
 
     const { data, error } = await query;
@@ -119,5 +122,36 @@ customersRouter.patch(
     });
 
     res.json({ data });
+  }),
+);
+
+export const citiesRouter = Router();
+citiesRouter.use(requireAuth);
+
+citiesRouter.get(
+  "/",
+  asyncHandler(async (req, res) => {
+    const { data, error } = await supabaseAdmin
+      .from("cities")
+      .select("*")
+      .eq("company_id", req.user!.company_id)
+      .order("name");
+    if (error) throw error;
+    res.json({ data });
+  }),
+);
+
+// كيان تنظيمي مشترك مثل التصنيفات والوحدات — أي مستخدم مسجّل دخوله يقدر يضيف مدينة
+citiesRouter.post(
+  "/",
+  asyncHandler(async (req, res) => {
+    const input = createCitySchema.parse(req.body);
+    const { data, error } = await supabaseAdmin
+      .from("cities")
+      .insert({ ...input, company_id: req.user!.company_id })
+      .select()
+      .single();
+    if (error) throw error;
+    res.status(201).json({ data });
   }),
 );
