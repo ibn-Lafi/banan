@@ -109,6 +109,7 @@ invoicesRouter.patch(
       {
         customer_id: input.customer_id ?? invoice.customer_id,
         invoice_date: input.invoice_date ?? invoice.invoice_date,
+        notes: input.notes !== undefined ? input.notes : invoice.notes,
         items:
           input.items ??
           invoice.invoice_items.map(

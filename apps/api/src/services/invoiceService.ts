@@ -71,6 +71,7 @@ export async function createInvoiceDraft(input: CreateInvoiceDraftInput, ctx: Cr
       original_amount_net: totals.original_amount_net,
       original_vat_amount: totals.original_vat_amount,
       current_amount_gross: totals.original_amount_gross,
+      notes: input.notes ?? null,
     })
     .select()
     .single();
