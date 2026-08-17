@@ -91,7 +91,7 @@ export function QuickPaymentModal({ onClose }: { onClose: () => void }) {
 
   return (
     <Modal title="تسجيل تحصيل" onClose={onClose}>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-3">
         <div>
           <label className="mb-1 block text-sm font-medium text-gray-700">العميل</label>
           <select className="input" value={customerId} onChange={(e) => setCustomerId(e.target.value)} required>

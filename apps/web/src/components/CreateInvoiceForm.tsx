@@ -151,7 +151,7 @@ export function CreateInvoiceForm({ onCreated }: { onCreated?: () => void }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
+    <form onSubmit={handleSubmit} className="space-y-3">
       <div>
         <label className="mb-1 block text-sm font-medium text-gray-700">العميل</label>
         <select className="input" value={customerId} onChange={(e) => setCustomerId(e.target.value)} required>
@@ -324,7 +324,7 @@ export function CreateInvoiceForm({ onCreated }: { onCreated?: () => void }) {
       </div>
 
       {lines.length > 0 && (
-        <div className="space-y-1 rounded-2xl border border-gray-200 p-4">
+        <div className="space-y-1 rounded-2xl border border-gray-200 p-3">
           <div className="flex items-center justify-between text-sm text-gray-500">
             <span>المجموع قبل الضريبة</span>
             <span>{subtotalNet.toFixed(2)} ر.س</span>
