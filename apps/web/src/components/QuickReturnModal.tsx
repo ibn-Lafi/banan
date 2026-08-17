@@ -30,7 +30,6 @@ export function QuickReturnModal({ onClose }: { onClose: () => void }) {
   const [invoiceId, setInvoiceId] = useState("");
   const [items, setItems] = useState<InvoiceItemDetail[]>([]);
   const [returnQty, setReturnQty] = useState<Record<string, string>>({});
-  const [condition, setCondition] = useState<Record<string, "sound" | "damaged">>({});
   const [loadingItems, setLoadingItems] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -72,7 +71,6 @@ export function QuickReturnModal({ onClose }: { onClose: () => void }) {
       .map(([invoice_item_id, qty]) => ({
         invoice_item_id,
         returned_quantity: Number(qty),
-        condition: condition[invoice_item_id] ?? "sound",
       }))
       .filter((line) => line.returned_quantity > 0);
 
@@ -134,7 +132,7 @@ export function QuickReturnModal({ onClose }: { onClose: () => void }) {
 
         {invoiceId && returnableItems.length > 0 && (
           <div>
-            <p className="mb-2 text-sm font-medium text-gray-700">حدد كمية وحالة المرتجع من بنود الفاتورة</p>
+            <p className="mb-2 text-sm font-medium text-gray-700">حدد كمية المرتجع من بنود الفاتورة</p>
             <div className="space-y-2">
               {returnableItems.map((item) => (
                 <div key={item.id} className="rounded-xl border border-gray-200 p-3">
@@ -144,33 +142,18 @@ export function QuickReturnModal({ onClose }: { onClose: () => void }) {
                       الحد الأقصى: {item.remaining} {item.unit_name_snapshot ?? ""}
                     </p>
                   </div>
-                  <div className="flex gap-2">
-                    <div className="flex-1">
-                      <label className="mb-1 block text-xs text-gray-500">الكمية المرتجعة</label>
-                      <input
-                        type="number"
-                        min={0}
-                        max={item.remaining}
-                        step="0.001"
-                        className="input"
-                        placeholder="0"
-                        value={returnQty[item.id] ?? ""}
-                        onChange={(e) => setReturnQty((prev) => ({ ...prev, [item.id]: e.target.value }))}
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <label className="mb-1 block text-xs text-gray-500">الحالة</label>
-                      <select
-                        className="input"
-                        value={condition[item.id] ?? "sound"}
-                        onChange={(e) =>
-                          setCondition((prev) => ({ ...prev, [item.id]: e.target.value as "sound" | "damaged" }))
-                        }
-                      >
-                        <option value="sound">سليم (يرجع للمخزن)</option>
-                        <option value="damaged">تالف</option>
-                      </select>
-                    </div>
+                  <div>
+                    <label className="mb-1 block text-xs text-gray-500">الكمية المرتجعة</label>
+                    <input
+                      type="number"
+                      min={0}
+                      max={item.remaining}
+                      step="0.001"
+                      className="input"
+                      placeholder="0"
+                      value={returnQty[item.id] ?? ""}
+                      onChange={(e) => setReturnQty((prev) => ({ ...prev, [item.id]: e.target.value }))}
+                    />
                   </div>
                 </div>
               ))}

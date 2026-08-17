@@ -177,7 +177,6 @@ export interface ReturnItem {
   line_net: number;
   line_vat: number;
   line_gross: number;
-  condition: "sound" | "damaged" | null;
 }
 
 export interface DocumentSequence {
