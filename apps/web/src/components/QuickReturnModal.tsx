@@ -23,9 +23,15 @@ interface InvoiceItemDetail {
 
 const RETURNABLE_STATUSES = ["issued", "partially_paid", "returned", "paid"];
 
-export function QuickReturnModal({ onClose }: { onClose: () => void }) {
+export function QuickReturnModal({
+  onClose,
+  initialCustomerId,
+}: {
+  onClose: () => void;
+  initialCustomerId?: string;
+}) {
   const [customers, setCustomers] = useState<Customer[]>([]);
-  const [customerId, setCustomerId] = useState("");
+  const [customerId, setCustomerId] = useState(initialCustomerId ?? "");
   const [invoices, setInvoices] = useState<InvoiceOption[]>([]);
   const [invoiceId, setInvoiceId] = useState("");
   const [items, setItems] = useState<InvoiceItemDetail[]>([]);

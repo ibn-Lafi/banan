@@ -18,9 +18,15 @@ interface InvoiceWithOutstanding extends InvoiceOption {
 
 const PAYMENT_METHODS = ["نقدًا", "شيك", "تحويل بنكي"];
 
-export function QuickPaymentModal({ onClose }: { onClose: () => void }) {
+export function QuickPaymentModal({
+  onClose,
+  initialCustomerId,
+}: {
+  onClose: () => void;
+  initialCustomerId?: string;
+}) {
   const [customers, setCustomers] = useState<Customer[]>([]);
-  const [customerId, setCustomerId] = useState("");
+  const [customerId, setCustomerId] = useState(initialCustomerId ?? "");
   const [invoices, setInvoices] = useState<InvoiceWithOutstanding[]>([]);
   const [loadingInvoices, setLoadingInvoices] = useState(false);
   const [invoiceId, setInvoiceId] = useState("");

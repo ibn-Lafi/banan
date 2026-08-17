@@ -27,12 +27,18 @@ function round2(v: number) {
 }
 
 /** القسم 22: مسار إصدار الفاتورة بأقل عدد خطوات — نموذج مشترك يُستخدم في الرئيسية وصفحة الفواتير */
-export function CreateInvoiceForm({ onCreated }: { onCreated?: () => void }) {
+export function CreateInvoiceForm({
+  onCreated,
+  initialCustomerId,
+}: {
+  onCreated?: () => void;
+  initialCustomerId?: string;
+}) {
   const router = useRouter();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [units, setUnits] = useState<Unit[]>([]);
-  const [customerId, setCustomerId] = useState("");
+  const [customerId, setCustomerId] = useState(initialCustomerId ?? "");
   const [lines, setLines] = useState<DraftLine[]>([]);
   const [paymentMethod, setPaymentMethod] = useState(PAYMENT_METHODS[0]);
   const [discountPercent, setDiscountPercent] = useState("0");

@@ -4,6 +4,11 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { apiFetch } from "@/lib/apiClient";
 import type { City, Customer } from "@banan/types";
+import { QuickInvoiceModal } from "@/components/QuickInvoiceModal";
+import { QuickReturnModal } from "@/components/QuickReturnModal";
+import { QuickPaymentModal } from "@/components/QuickPaymentModal";
+
+type ActiveModal = { type: "invoice" | "return" | "payment"; customerId: string } | null;
 
 export default function CustomersPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -11,6 +16,7 @@ export default function CustomersPage() {
   const [search, setSearch] = useState("");
   const [cityFilter, setCityFilter] = useState("all");
   const [loading, setLoading] = useState(true);
+  const [activeModal, setActiveModal] = useState<ActiveModal>(null);
 
   useEffect(() => {
     apiFetch<{ data: City[] }>("/cities").then((res) => setCities(res.data));
@@ -35,8 +41,8 @@ export default function CustomersPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold">العملاء</h1>
-        <Link href="/customers/new" className="rounded-lg bg-brand-600 px-3 py-2 text-sm font-semibold text-white">
-          + إضافة عميل
+        <Link href="/customers/new" className="pill-btn w-auto bg-brand-600 px-4 text-white">
+          + عميل جديد
         </Link>
       </div>
 
@@ -63,10 +69,10 @@ export default function CustomersPage() {
       ) : customers.length === 0 ? (
         <p className="py-8 text-center text-sm text-gray-400">لا يوجد عملاء بعد</p>
       ) : (
-        <ul className="divide-y divide-gray-100 overflow-hidden rounded-xl border border-gray-200 bg-white">
+        <div className="space-y-3">
           {customers.map((customer) => (
-            <li key={customer.id}>
-              <Link href={`/customers/${customer.id}`} className="flex items-center justify-between px-4 py-3">
+            <div key={customer.id} className="rounded-2xl border border-gray-200 bg-white p-4">
+              <Link href={`/customers/${customer.id}`} className="flex items-center justify-between">
                 <div>
                   <p className="font-medium">{customer.name}</p>
                   <p className="text-xs text-gray-500">
@@ -82,9 +88,53 @@ export default function CustomersPage() {
                   {customer.status === "active" ? "نشط" : "موقوف"}
                 </span>
               </Link>
-            </li>
+
+              <div className="mt-3 flex flex-wrap gap-2">
+                {customer.maps_url && (
+                  <a
+                    href={customer.maps_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="chip whitespace-nowrap border-gray-300 text-gray-700"
+                  >
+                    فتح الموقع
+                  </a>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setActiveModal({ type: "invoice", customerId: customer.id })}
+                  className="chip whitespace-nowrap border-gray-300 text-gray-700"
+                >
+                  فاتورة جديدة
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveModal({ type: "payment", customerId: customer.id })}
+                  className="chip whitespace-nowrap border-gray-300 text-gray-700"
+                >
+                  تسجيل تحصيل
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveModal({ type: "return", customerId: customer.id })}
+                  className="chip whitespace-nowrap border-gray-300 text-gray-700"
+                >
+                  تسجيل مرتجع
+                </button>
+              </div>
+            </div>
           ))}
-        </ul>
+        </div>
+      )}
+
+      {activeModal?.type === "invoice" && (
+        <QuickInvoiceModal initialCustomerId={activeModal.customerId} onClose={() => setActiveModal(null)} />
+      )}
+      {activeModal?.type === "return" && (
+        <QuickReturnModal initialCustomerId={activeModal.customerId} onClose={() => setActiveModal(null)} />
+      )}
+      {activeModal?.type === "payment" && (
+        <QuickPaymentModal initialCustomerId={activeModal.customerId} onClose={() => setActiveModal(null)} />
       )}
     </div>
   );
