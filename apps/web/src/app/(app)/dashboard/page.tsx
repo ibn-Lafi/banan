@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { apiFetch } from "@/lib/apiClient";
 import { getSession } from "@/lib/session";
+import { QuickInvoiceModal } from "@/components/QuickInvoiceModal";
 
 interface ReportSummary {
   invoices_count: number;
@@ -15,6 +15,7 @@ interface ReportSummary {
 
 export default function DashboardPage() {
   const [summary, setSummary] = useState<ReportSummary | null>(null);
+  const [showCreate, setShowCreate] = useState(false);
   const session = getSession();
 
   useEffect(() => {
@@ -31,12 +32,12 @@ export default function DashboardPage() {
       </div>
 
       <div className="-mt-8">
-        <Link
-          href="/invoices"
-          className="block rounded-2xl bg-white px-4 py-4 text-center font-semibold text-gray-900 shadow-lg ring-1 ring-black/5"
+        <button
+          onClick={() => setShowCreate(true)}
+          className="block w-full rounded-2xl bg-white px-4 py-4 text-center font-semibold text-gray-900 shadow-lg ring-1 ring-black/5"
         >
           + إنشاء فاتورة جديدة
-        </Link>
+        </button>
       </div>
 
       <div className="grid grid-cols-2 gap-3">
@@ -45,6 +46,8 @@ export default function DashboardPage() {
         <StatCard label="إجمالي المرتجعات" value={summary ? `${summary.total_returns} ر.س` : "—"} />
         <StatCard label="المبلغ المطلوب" value={summary ? `${summary.total_outstanding} ر.س` : "—"} />
       </div>
+
+      {showCreate && <QuickInvoiceModal onClose={() => setShowCreate(false)} />}
     </div>
   );
 }

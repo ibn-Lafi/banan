@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { navItems } from "./NavLinks";
 import { PlusIcon } from "./icons";
+import { QuickInvoiceModal } from "./QuickInvoiceModal";
 import { QuickReturnModal } from "./QuickReturnModal";
 import { QuickPaymentModal } from "./QuickPaymentModal";
 
@@ -12,7 +13,7 @@ import { QuickPaymentModal } from "./QuickPaymentModal";
 export function BottomNav() {
   const pathname = usePathname();
   const [showActions, setShowActions] = useState(false);
-  const [activeModal, setActiveModal] = useState<"return" | "payment" | null>(null);
+  const [activeModal, setActiveModal] = useState<"invoice" | "return" | "payment" | null>(null);
 
   return (
     <>
@@ -31,13 +32,16 @@ export function BottomNav() {
         <div className="relative mx-auto max-w-md">
           {showActions && (
             <div className="absolute inset-x-6 -top-[13.5rem] space-y-1 rounded-2xl bg-white p-2 shadow-xl">
-              <Link
-                href="/invoices?create=1"
-                onClick={() => setShowActions(false)}
-                className="block rounded-xl px-4 py-3 text-center font-medium text-gray-800 hover:bg-gray-50"
+              <button
+                type="button"
+                onClick={() => {
+                  setShowActions(false);
+                  setActiveModal("invoice");
+                }}
+                className="block w-full rounded-xl px-4 py-3 text-center font-medium text-gray-800 hover:bg-gray-50"
               >
                 فاتورة جديدة
-              </Link>
+              </button>
               <button
                 type="button"
                 onClick={() => {
@@ -93,6 +97,7 @@ export function BottomNav() {
         </div>
       </nav>
 
+      {activeModal === "invoice" && <QuickInvoiceModal onClose={() => setActiveModal(null)} />}
       {activeModal === "return" && <QuickReturnModal onClose={() => setActiveModal(null)} />}
       {activeModal === "payment" && <QuickPaymentModal onClose={() => setActiveModal(null)} />}
     </>

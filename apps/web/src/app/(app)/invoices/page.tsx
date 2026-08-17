@@ -2,9 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import { apiFetch } from "@/lib/apiClient";
-import { CreateInvoiceForm } from "@/components/CreateInvoiceForm";
+import { QuickInvoiceModal } from "@/components/QuickInvoiceModal";
 
 interface InvoiceListItem {
   id: string;
@@ -39,11 +38,10 @@ const FILTERS: { key: string; label: string }[] = [
 ];
 
 export default function InvoicesPage() {
-  const searchParams = useSearchParams();
   const [invoices, setInvoices] = useState<InvoiceListItem[]>([]);
   const [customers, setCustomers] = useState<CustomerOption[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showCreate, setShowCreate] = useState(() => searchParams.get("create") === "1");
+  const [showCreate, setShowCreate] = useState(false);
   const [statusFilter, setStatusFilter] = useState("all");
   const [customerFilter, setCustomerFilter] = useState("all");
   const [fromDate, setFromDate] = useState("");
@@ -79,22 +77,20 @@ export default function InvoicesPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold">الفواتير</h1>
         <button
-          onClick={() => setShowCreate((v) => !v)}
+          onClick={() => setShowCreate(true)}
           className="rounded-lg bg-brand-600 px-3 py-2 text-sm font-semibold text-white"
         >
-          {showCreate ? "إخفاء النموذج" : "+ فاتورة جديدة"}
+          + فاتورة جديدة
         </button>
       </div>
 
       {showCreate && (
-        <div className="rounded-xl border border-gray-200 bg-white p-4">
-          <CreateInvoiceForm
-            onCreated={() => {
-              setShowCreate(false);
-              load();
-            }}
-          />
-        </div>
+        <QuickInvoiceModal
+          onClose={() => {
+            setShowCreate(false);
+            load();
+          }}
+        />
       )}
 
       <div className="space-y-2">
