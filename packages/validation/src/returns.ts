@@ -3,6 +3,7 @@ import { z } from "zod";
 export const returnItemInputSchema = z.object({
   invoice_item_id: z.string().uuid(),
   returned_quantity: z.number().positive(),
+  condition: z.enum(["sound", "damaged"]).optional().nullable(),
 });
 export type ReturnItemInput = z.infer<typeof returnItemInputSchema>;
 

@@ -59,6 +59,7 @@ export async function createReturn(input: CreateReturnInput, ctx: CreateReturnCo
       invoice_item_id: invoiceItem.id,
       returned_quantity: requested.returned_quantity,
       unit_price_at_return: Number(invoiceItem.unit_price),
+      condition: requested.condition ?? null,
       ...tax,
     };
   });
@@ -100,6 +101,7 @@ export async function createReturn(input: CreateReturnInput, ctx: CreateReturnCo
         line_net: line.line_net,
         line_vat: line.line_vat,
         line_gross: line.line_gross,
+        condition: line.condition,
       })),
     );
   if (returnItemsError) throw returnItemsError;

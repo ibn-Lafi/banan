@@ -5,17 +5,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { navItems } from "./NavLinks";
 import { PlusIcon } from "./icons";
-
-const QUICK_ACTIONS = [
-  { href: "/invoices?create=1", label: "فاتورة جديدة" },
-  { href: "/invoices", label: "تسجيل مرتجع" },
-  { href: "/invoices", label: "تحصيل" },
-];
+import { QuickReturnModal } from "./QuickReturnModal";
+import { QuickPaymentModal } from "./QuickPaymentModal";
 
 /** القسم 22.1: Bottom Navigation Bar ثابت للجوال — App-like UI */
 export function BottomNav() {
   const pathname = usePathname();
   const [showActions, setShowActions] = useState(false);
+  const [activeModal, setActiveModal] = useState<"return" | "payment" | null>(null);
 
   return (
     <>
@@ -34,16 +31,33 @@ export function BottomNav() {
         <div className="relative mx-auto max-w-md">
           {showActions && (
             <div className="absolute inset-x-6 -top-[13.5rem] space-y-1 rounded-2xl bg-white p-2 shadow-xl">
-              {QUICK_ACTIONS.map((action) => (
-                <Link
-                  key={action.label}
-                  href={action.href}
-                  onClick={() => setShowActions(false)}
-                  className="block rounded-xl px-4 py-3 text-center font-medium text-gray-800 hover:bg-gray-50"
-                >
-                  {action.label}
-                </Link>
-              ))}
+              <Link
+                href="/invoices?create=1"
+                onClick={() => setShowActions(false)}
+                className="block rounded-xl px-4 py-3 text-center font-medium text-gray-800 hover:bg-gray-50"
+              >
+                فاتورة جديدة
+              </Link>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowActions(false);
+                  setActiveModal("return");
+                }}
+                className="block w-full rounded-xl px-4 py-3 text-center font-medium text-gray-800 hover:bg-gray-50"
+              >
+                تسجيل مرتجع
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowActions(false);
+                  setActiveModal("payment");
+                }}
+                className="block w-full rounded-xl px-4 py-3 text-center font-medium text-gray-800 hover:bg-gray-50"
+              >
+                تحصيل
+              </button>
             </div>
           )}
 
@@ -78,6 +92,9 @@ export function BottomNav() {
           </div>
         </div>
       </nav>
+
+      {activeModal === "return" && <QuickReturnModal onClose={() => setActiveModal(null)} />}
+      {activeModal === "payment" && <QuickPaymentModal onClose={() => setActiveModal(null)} />}
     </>
   );
 }
